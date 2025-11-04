@@ -4,9 +4,9 @@ import common.ddd.Aggregate;
 
 public interface Delivery extends Aggregate<DeliveryId> {
 
-    void trackDelivery();   // userId
+    void trackDelivery(UserId userId);
 
-    String getDeliveryState();
+    DeliveryState getDeliveryState();
 
     int getDaysLeft();
 
