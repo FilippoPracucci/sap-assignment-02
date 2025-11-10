@@ -17,8 +17,6 @@ tags:
   - name: user-session
     description: Logged in user session
 
-# TODO userName not unique
-
 paths:
 
   /accounts:
@@ -248,7 +246,7 @@ components:
       properties:
         userName:
           type: string
-          description: user name, uniquely defined
+          description: user name
         password:
           type: string
           description: password of the user
