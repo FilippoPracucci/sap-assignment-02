@@ -2,15 +2,15 @@ package delivery_service.domain;
 
 import common.ddd.Entity;
 
-import java.util.Date;
+import java.util.Calendar;
 
-interface DeliveryDetail extends Entity<DeliveryId> {
+public interface DeliveryDetail extends Entity<DeliveryId> {
 
-    double getWeight();
+    double weight();
 
-    Address getStartingPlace();
+    Address startingPlace();
 
-    Address getDestinationPlace();
+    Address destinationPlace();
 
-    Date getExpectedShippingDate();
+    Calendar expectedShippingDate();
 }

@@ -4,6 +4,8 @@ import common.ddd.Aggregate;
 
 public interface Delivery extends Aggregate<DeliveryId> {
 
+    DeliveryDetail getDeliveryDetail();
+
     void startTracking();
 
     void stopTracking();

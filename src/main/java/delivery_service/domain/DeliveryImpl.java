@@ -1,9 +1,6 @@
 package delivery_service.domain;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class DeliveryImpl implements Delivery {
 
@@ -18,7 +15,7 @@ public class DeliveryImpl implements Delivery {
             final double weight,
             final Address startingPlace,
             final Address destinationPlace,
-            final Date expectedShippingDate
+            final Calendar expectedShippingDate
     ) {
        this(deliveryId, weight, startingPlace, destinationPlace, Optional.of(expectedShippingDate));
     }
@@ -37,7 +34,7 @@ public class DeliveryImpl implements Delivery {
             final double weight,
             final Address startingPlace,
             final Address destinationPlace,
-            final Optional<Date> expectedShippingDate
+            final Optional<Calendar> expectedShippingDate
     ) {
         this.id = deliveryId;
         this.deliveryDetail = expectedShippingDate
@@ -46,6 +43,11 @@ public class DeliveryImpl implements Delivery {
         this.deliveryStatus = null;
         this.observers = new ArrayList<>();
         // TODO: add the drone
+    }
+
+    @Override
+    public DeliveryDetail getDeliveryDetail() {
+        return this.deliveryDetail;
     }
 
     @Override

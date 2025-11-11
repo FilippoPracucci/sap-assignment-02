@@ -3,6 +3,7 @@ package delivery_service.application;
 import common.hexagonal.InBoundPort;
 import delivery_service.domain.*;
 
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -41,7 +42,7 @@ public interface DeliveryService {
 	DeliveryId createNewDelivery(double weight,
 								 Address startingPlace,
 								 Address destinationPlace,
-								 Date expectedShippingDate);
+								 Calendar expectedShippingDate);
 	
 	/**
 	 * 
