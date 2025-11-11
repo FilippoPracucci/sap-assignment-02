@@ -7,8 +7,6 @@ import java.util.Optional;
 
 public class DeliveryImpl implements Delivery {
 
-    private static final String DELIVERY_PREFIX = "delivery-";
-
     private final DeliveryId id;
     private final DeliveryDetail deliveryDetail;
     private final DeliveryStatus deliveryStatus;
@@ -16,25 +14,32 @@ public class DeliveryImpl implements Delivery {
     private boolean isInTracking;
 
     public DeliveryImpl(
+            final DeliveryId deliveryId,
             final double weight,
             final Address startingPlace,
             final Address destinationPlace,
             final Date expectedShippingDate
     ) {
-       this(weight, startingPlace, destinationPlace, Optional.of(expectedShippingDate));
+       this(deliveryId, weight, startingPlace, destinationPlace, Optional.of(expectedShippingDate));
     }
 
-    public DeliveryImpl(final double weight, final Address startingPlace, final Address destinationPlace) {
-        this(weight, startingPlace, destinationPlace, Optional.empty());
+    public DeliveryImpl(
+            final DeliveryId deliveryId,
+            final double weight,
+            final Address startingPlace,
+            final Address destinationPlace
+    ) {
+        this(deliveryId, weight, startingPlace, destinationPlace, Optional.empty());
     }
 
     private DeliveryImpl(
+            final DeliveryId deliveryId,
             final double weight,
             final Address startingPlace,
             final Address destinationPlace,
             final Optional<Date> expectedShippingDate
     ) {
-        this.id = new DeliveryId(DELIVERY_PREFIX + 0); // TODO: retrieve from DB
+        this.id = deliveryId;
         this.deliveryDetail = expectedShippingDate
                 .map(date -> new DeliveryDetailImpl(this.id, weight, startingPlace, destinationPlace, date))
                 .orElseGet(() -> new DeliveryDetailImpl(this.id, weight, startingPlace, destinationPlace));
