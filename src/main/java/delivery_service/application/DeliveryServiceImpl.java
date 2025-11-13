@@ -3,7 +3,6 @@ package delivery_service.application;
 import delivery_service.domain.*;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,12 +22,12 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
 	@Override
-	public Delivery getDeliveryDetail(final DeliveryId deliveryId) throws DeliveryNotFoundException {
+	public DeliveryDetail getDeliveryDetail(final DeliveryId deliveryId) throws DeliveryNotFoundException {
 		logger.log(Level.INFO, "get delivery " + deliveryId + " detail");
 		if (!this.deliveryRepository.isPresent(deliveryId)) {
 			throw new DeliveryNotFoundException();
 		}
-		return this.deliveryRepository.getDelivery(deliveryId);
+		return this.deliveryRepository.getDelivery(deliveryId).getDeliveryDetail();
 	}
 
 	@Override

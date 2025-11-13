@@ -22,7 +22,7 @@ public interface DeliveryService {
      * @return
      * @throws DeliveryNotFoundException
      */
-	Delivery getDeliveryDetail(DeliveryId deliveryId) throws DeliveryNotFoundException;
+	DeliveryDetail getDeliveryDetail(DeliveryId deliveryId) throws DeliveryNotFoundException;
 		
 	/**
 	 * 

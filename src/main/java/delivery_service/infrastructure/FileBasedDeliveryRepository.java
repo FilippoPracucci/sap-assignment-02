@@ -115,7 +115,7 @@ public class FileBasedDeliveryRepository implements DeliveryRepository {
 			JsonArray list = new JsonArray();
 			for (final Delivery delivery: this.deliveries.values()) {
 				var obj = new JsonObject();
-				obj.put("userId", delivery.getId().id());
+				obj.put("deliveryId", delivery.getId().id());
 				obj.put("weight", delivery.getDeliveryDetail().weight());
 				obj.put("startingPlace", new JsonObject(Map.of(
 						"street", delivery.getDeliveryDetail().startingPlace().street(),

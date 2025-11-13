@@ -1,5 +1,6 @@
 package lobby_service.infrastructure;
 
+import delivery_service.domain.Address;
 import lobby_service.application.LobbyService;
 import lobby_service.application.LoginFailedException;
 import io.vertx.core.Future;
@@ -13,6 +14,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
 import lobby_service.domain.DeliveryId;
 
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,7 +34,7 @@ public class LobbyServiceController extends VerticleBase  {
 	static final String CREATE_DELIVERY_RESOURCE_PATH = 	"/api/" + API_VERSION + "/user-sessions/:sessionId/create-delivery";
 	static final String TRACK_DELIVERY_RESOURCE_PATH = 		"/api/" + API_VERSION + "/user-sessions/:sessionId/track-delivery";
 
-	static final String DELIVERY_SERVICE_URI = 	"http://localhost:9002/api/v1/deliveries";
+	static final String DELIVERY_SERVICE_URI = 	"/api/" + API_VERSION + "/deliveries";
 
 	/* Ref. to the application layer */
 	private final LobbyService lobbyService;
@@ -107,13 +109,30 @@ public class LobbyServiceController extends VerticleBase  {
 	 * 
 	 * @param context
 	 */
-	protected void createDelivery(RoutingContext context) {
+	protected void createDelivery(final RoutingContext context) {
 		logger.log(Level.INFO, "Create delivery request");
 		context.request().handler(buf -> {
+			final JsonObject deliveryDetail = buf.toJsonObject();
 			String userSessionId = context.pathParam("sessionId");
 			var reply = new JsonObject();
 			try {
-				DeliveryId deliveryId = this.lobbyService.createNewDelivery(userSessionId);
+				final DeliveryId deliveryId = this.lobbyService.createNewDelivery(
+						userSessionId,
+						deliveryDetail.getNumber("weight").doubleValue(),
+						new Address(
+								deliveryDetail.getJsonObject("startingPlace").getString("street"),
+								deliveryDetail.getJsonObject("startingPlace").getNumber("number").intValue()
+						),
+						new Address(
+								deliveryDetail.getJsonObject("destinationPlace").getString("street"),
+								deliveryDetail.getJsonObject("destinationPlace").getNumber("number").intValue()
+						),
+						new Calendar.Builder().setDate(
+								deliveryDetail.getJsonObject("targetTime").getNumber("year").intValue(),
+								deliveryDetail.getJsonObject("targetTime").getNumber("month").intValue(),
+								deliveryDetail.getJsonObject("targetTime").getNumber("day").intValue()
+						).build()
+				);
 				reply.put("result", "ok");
 				reply.put("deliveryId", deliveryId.id());
 				reply.put("deliveryLink", DELIVERY_SERVICE_URI + "/" + deliveryId.id());

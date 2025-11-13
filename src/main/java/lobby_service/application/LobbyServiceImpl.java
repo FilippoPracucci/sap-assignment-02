@@ -1,7 +1,9 @@
 package lobby_service.application;
 
+import delivery_service.domain.Address;
 import lobby_service.domain.*;
 
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,11 +34,14 @@ public class LobbyServiceImpl implements LobbyService {
 	}
 
 	@Override
-	public DeliveryId createNewDelivery(final String userSessionId) throws CreateDeliveryFailedException {
+	public DeliveryId createNewDelivery(final String userSessionId, final double weight, final Address startingPlace,
+										final Address destinationPlace, final Calendar targetTime)
+			throws CreateDeliveryFailedException {
 		try {
 			if (this.userSessionRepository.isPresent(userSessionId)) {
-				final DeliveryId deliveryId = this.deliveryService.createNewDelivery();
-				logger.log(Level.INFO, "create new delivery " + userSessionId + " " + deliveryId);
+				final DeliveryId deliveryId = this.deliveryService.createNewDelivery(weight, startingPlace,
+						destinationPlace, targetTime);
+				logger.log(Level.INFO, "create new delivery " + deliveryId.id() + " by " + userSessionId);
 				return deliveryId;
 			} else {
 				throw new CreateDeliveryFailedException();

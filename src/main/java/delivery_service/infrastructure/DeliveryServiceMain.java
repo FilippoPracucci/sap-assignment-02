@@ -1,0 +1,17 @@
+package delivery_service.infrastructure;
+
+import delivery_service.application.DeliveryServiceImpl;
+import io.vertx.core.Vertx;
+
+public class DeliveryServiceMain {
+
+	static final int DELIVERY_SERVICE_PORT = 9002;
+
+	public static void main(String[] args) {
+		final var deliveryService = new DeliveryServiceImpl();
+		deliveryService.bindDeliveryRepository(new FileBasedDeliveryRepository());
+		Vertx.vertx().deployVerticle(new DeliveryServiceController(deliveryService, DELIVERY_SERVICE_PORT));
+	}
+
+}
+
