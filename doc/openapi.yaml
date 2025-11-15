@@ -6,7 +6,7 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 0.1.1
+  version: 0.1.2
 servers:
   - url: https://localhost:8080/api/v1
 tags:
@@ -42,22 +42,22 @@ paths:
         '200':
           description: account successfully created
           content:
-            application/json:       
+            application/json:
               schema:
                 type: object
                 properties:
                   accountId:
-                    description: account id 
+                    description: account id
                     type: string
                   loginLink:
-                    description: link to do login 
+                    description: link to do login
                     type: string
                   accountLink:
                     description: link to the account resource
                     type: string
-                    
+
   /accounts/{accountId}:
-     get:
+    get:
       tags:
         - account
       description: Get account info
@@ -76,7 +76,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Account'
-                
+
   /accounts/{accountId}/login:
     post:
       tags:
@@ -100,15 +100,15 @@ paths:
         '200':
           description: user successfully logged in
           content:
-            application/json:       
+            application/json:
               schema:
                 type: object
                 properties:
                   sessionId:
-                    description: user session id 
+                    description: user session id
                     type: string
                   sessionLink:
-                    description: link to user session resource 
+                    description: link to user session resource
                     type: string
                   createDeliveryLink:
                     description: link to create a new delivery
@@ -116,9 +116,9 @@ paths:
                   trackDeliveryLink:
                     description: link to track a delivery
                     type: string
-                    
+
   /deliveries/{deliveryId}:
-     get:
+    get:
       tags:
         - delivery
       description: Get delivery info
@@ -192,19 +192,44 @@ paths:
           description: the delivery starting place
           required: true
           schema:
-            type: string
+            type: object
+            properties:
+              street:
+                description: the delivery starting place street
+                type: string
+              number:
+                description: the delivery starting place number
+                type: number
         - name: destinationPlace
           in: query
           description: the delivery destination place
           required: true
           schema:
-            type: string
+            type: object
+            properties:
+              street:
+                description: the delivery destination place street
+                type: string
+              number:
+                description: the delivery destination place number
+                type: number
         - name: targetTime
           in: query
           description: the desired time to deliver the package
           required: true
           schema:
-            type: string
+            type: object
+            properties:
+              year:
+                description: the desired year to deliver the package
+                type: number
+              month:
+                description: the desired month to deliver the package
+                type: number
+              day:
+                description: the desired day to deliver the package
+                type: number
+              # TODO: add the time
       responses:
         '200':
           description: delivery successfully created
@@ -282,13 +307,35 @@ components:
           type: number
           description: weight of the objects to deliver
         startingPlace:
-          type: string
+          properties:
+            street:
+              description: the delivery starting place street
+              type: string
+            number:
+              description: the delivery starting place number
+              type: number
           description: the delivery starting place
         destinationPlace:
-          type: string
+          properties:
+            street:
+              description: the delivery destination place street
+              type: string
+            number:
+              description: the delivery destination place number
+              type: number
           description: the delivery destination place
         targetTime:
-          type: string
+          properties:
+            year:
+              description: the desired year to deliver the package
+              type: number
+            month:
+              description: the desired month to deliver the package
+              type: number
+            day:
+              description: the desired day to deliver the package
+              type: number
+            # TODO: add the time
           description: the desired time to deliver the package
     DeliveryStatus:
       type: object
