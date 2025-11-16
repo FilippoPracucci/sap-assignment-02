@@ -153,7 +153,7 @@ public class LobbyServiceController extends VerticleBase  {
 	 * @param context
 	 */
 	protected void trackDelivery(RoutingContext context) {
-		logger.log(Level.INFO, "Join game request");
+		logger.log(Level.INFO, "Track delivery request");
 		context.request().handler(buf -> {
 			final String userSessionId = context.pathParam("sessionId");
 			final String deliveryId = buf.toJsonObject().getString("deliveryId");
