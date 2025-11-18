@@ -116,6 +116,7 @@ public class DeliveryImpl implements Delivery, DroneObserver {
             try {
                 System.out.println("Waiting " + Instant.now().until(this.deliveryDetail.expectedShippingDate().toInstant(),
                         ChronoUnit.MILLIS) / 1000);
+                System.out.println("ExpectedShippingDate " + this.deliveryDetail.expectedShippingDate().toInstant());
                 Thread.sleep(Instant.now().until(this.deliveryDetail.expectedShippingDate().toInstant(),
                         ChronoUnit.MILLIS) / 1000); // TODO change for testing
                 drone.startDrone();

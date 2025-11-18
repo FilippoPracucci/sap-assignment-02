@@ -44,10 +44,10 @@ public class LobbyServiceImpl implements LobbyService {
 				logger.log(Level.INFO, "create new delivery " + deliveryId.id() + " by " + userSessionId);
 				return deliveryId;
 			} else {
-				throw new CreateDeliveryFailedException();
+				throw new CreateDeliveryFailedException("User is not logged in");
 			}
 		} catch (final ServiceNotAvailableException ex) {
-			throw new CreateDeliveryFailedException();
+			throw new CreateDeliveryFailedException("The service is not available");
 		}
 	}
 

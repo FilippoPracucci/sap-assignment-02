@@ -1,8 +1,8 @@
 package lobby_service.infrastructure;
 
-import delivery_service.domain.Address;
 import lobby_service.application.LobbyService;
 import lobby_service.application.LoginFailedException;
+import lobby_service.domain.DeliveryId;
 import io.vertx.core.Future;
 import io.vertx.core.VerticleBase;
 import io.vertx.core.http.HttpMethod;
@@ -12,8 +12,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
-import lobby_service.domain.DeliveryId;
 
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -112,31 +112,27 @@ public class LobbyServiceController extends VerticleBase  {
 	protected void createDelivery(final RoutingContext context) {
 		logger.log(Level.INFO, "Create delivery request");
 		context.request().handler(buf -> {
-			final JsonObject deliveryDetail = buf.toJsonObject();
+			final JsonObject deliveryDetailJson = buf.toJsonObject();
 			String userSessionId = context.pathParam("sessionId");
 			var reply = new JsonObject();
 			try {
-				final DeliveryId deliveryId = this.lobbyService.createNewDelivery(
-						userSessionId,
-						deliveryDetail.getNumber("weight").doubleValue(),
-						new Address(
-								deliveryDetail.getJsonObject("startingPlace").getString("street"),
-								deliveryDetail.getJsonObject("startingPlace").getNumber("number").intValue()
-						),
-						new Address(
-								deliveryDetail.getJsonObject("destinationPlace").getString("street"),
-								deliveryDetail.getJsonObject("destinationPlace").getNumber("number").intValue()
-						),
-						new Calendar.Builder().setDate(
-								deliveryDetail.getJsonObject("targetTime").getNumber("year").intValue(),
-								deliveryDetail.getJsonObject("targetTime").getNumber("month").intValue(),
-								deliveryDetail.getJsonObject("targetTime").getNumber("day").intValue()
-						).build()
-				);
-				reply.put("result", "ok");
-				reply.put("deliveryId", deliveryId.id());
-				reply.put("deliveryLink", DELIVERY_SERVICE_URI + "/" + deliveryId.id());
-				reply.put("trackDeliveryLink", TRACK_DELIVERY_RESOURCE_PATH.replace(":sessionId", userSessionId));
+				final Calendar targetTime = DeliveryJsonConverter.getTargetTime(deliveryDetailJson);
+				if (targetTime.toInstant().isBefore(Instant.now())) {
+					reply.put("result", "error");
+					reply.put("error", "past-target-time");
+				} else {
+					final DeliveryId deliveryId = this.lobbyService.createNewDelivery(
+							userSessionId,
+							deliveryDetailJson.getNumber("weight").doubleValue(),
+							DeliveryJsonConverter.getAddress(deliveryDetailJson, "startingPlace"),
+							DeliveryJsonConverter.getAddress(deliveryDetailJson, "destinationPlace"),
+							targetTime
+					);
+					reply.put("result", "ok");
+					reply.put("deliveryId", deliveryId.id());
+					reply.put("deliveryLink", DELIVERY_SERVICE_URI + "/" + deliveryId.id());
+					reply.put("trackDeliveryLink", TRACK_DELIVERY_RESOURCE_PATH.replace(":sessionId", userSessionId));
+				}
 				sendReply(context.response(), reply);
 			} catch (Exception ex) {
 				reply.put("result", "error");

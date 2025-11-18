@@ -13,6 +13,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
 
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.Optional;
@@ -83,17 +84,23 @@ public class DeliveryServiceController extends VerticleBase  {
 			final JsonObject deliveryDetailJson = buf.toJsonObject();
 			logger.log(Level.INFO, "Payload: " + deliveryDetailJson);
 			var reply = new JsonObject();
-			try {	// TODO add immediate time, check date > now
-				final DeliveryId deliveryId = this.deliveryService.createNewDelivery(
-						deliveryDetailJson.getNumber("weight").doubleValue(),
-						DeliveryJsonConverter.getAddress(deliveryDetailJson, "startingPlace"),
-						DeliveryJsonConverter.getAddress(deliveryDetailJson, "destinationPlace"),
-						DeliveryJsonConverter.getTargetTime(deliveryDetailJson)
-				);
-				reply.put("result", "ok");
-				reply.put("deliveryId", deliveryId.id());
-				reply.put("deliveryLink", DELIVERY_RESOURCE_PATH.replace(":deliveryId", deliveryId.id()));
-				reply.put("trackDeliveryLink", TRACK_RESOURCE_PATH.replace(":deliveryId", deliveryId.id()));
+			try {	// TODO add immediate time
+				final Calendar targetTime = DeliveryJsonConverter.getTargetTime(deliveryDetailJson);
+				if (targetTime.toInstant().isBefore(Instant.now())) {
+					reply.put("result", "error");
+					reply.put("error", "past-target-time");
+				} else {
+					final DeliveryId deliveryId = this.deliveryService.createNewDelivery(
+							deliveryDetailJson.getNumber("weight").doubleValue(),
+							DeliveryJsonConverter.getAddress(deliveryDetailJson, "startingPlace"),
+							DeliveryJsonConverter.getAddress(deliveryDetailJson, "destinationPlace"),
+							targetTime
+					);
+					reply.put("result", "ok");
+					reply.put("deliveryId", deliveryId.id());
+					reply.put("deliveryLink", DELIVERY_RESOURCE_PATH.replace(":deliveryId", deliveryId.id()));
+					reply.put("trackDeliveryLink", TRACK_RESOURCE_PATH.replace(":deliveryId", deliveryId.id()));
+				}
 				sendReply(context.response(), reply);
 			} catch (final Exception ex) {
 				logger.log(Level.SEVERE, ex.getMessage());

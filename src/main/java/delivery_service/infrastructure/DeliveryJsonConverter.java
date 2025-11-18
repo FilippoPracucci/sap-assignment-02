@@ -32,6 +32,10 @@ public class DeliveryJsonConverter {
                 json.getJsonObject("targetTime").getNumber("year").intValue(),
                 json.getJsonObject("targetTime").getNumber("month").intValue() - 1,
                 json.getJsonObject("targetTime").getNumber("day").intValue()
+        ).setTimeOfDay(
+                json.getJsonObject("targetTime").getNumber("hours").intValue(),
+                json.getJsonObject("targetTime").getNumber("minutes").intValue(),
+                0
         ).build();
     }
 
@@ -50,7 +54,9 @@ public class DeliveryJsonConverter {
         obj.put("targetTime", new JsonObject(Map.of(
                 "year", deliveryDetail.expectedShippingDate().get(Calendar.YEAR),
                 "month", deliveryDetail.expectedShippingDate().get(Calendar.MONTH) + 1,
-                "day", deliveryDetail.expectedShippingDate().get(Calendar.DAY_OF_MONTH))
+                "day", deliveryDetail.expectedShippingDate().get(Calendar.DAY_OF_MONTH),
+                "hours", deliveryDetail.expectedShippingDate().get(Calendar.HOUR_OF_DAY),
+                "minutes", deliveryDetail.expectedShippingDate().get(Calendar.MINUTE))
         ));
         deliveryState.ifPresent(state -> obj.put("state", state.getLabel()));
         return obj;

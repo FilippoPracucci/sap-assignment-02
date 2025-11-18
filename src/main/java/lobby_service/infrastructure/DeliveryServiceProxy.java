@@ -11,7 +11,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Calendar;
-import java.util.Map;
 
 @Adapter
 public class DeliveryServiceProxy implements DeliveryService {
@@ -27,27 +26,13 @@ public class DeliveryServiceProxy implements DeliveryService {
                                         final Address destinationPlace, final Calendar targetTime)
             throws CreateDeliveryFailedException, ServiceNotAvailableException {
         HttpClient client = HttpClient.newHttpClient();
-        JsonObject body = new JsonObject();
-        body.put("weight", weight);
-        body.put("startingPlace", new JsonObject(Map.of(
-                "street", startingPlace.street(),
-                "number", startingPlace.number())
-        ));
-        body.put("destinationPlace", new JsonObject(Map.of(
-                "street", destinationPlace.street(),
-                "number", destinationPlace.number())
-        ));
-        body.put("targetTime", new JsonObject(Map.of(
-                "year", targetTime.get(Calendar.YEAR),
-                "month", targetTime.get(Calendar.MONTH),
-                "day", targetTime.get(Calendar.DAY_OF_MONTH))
-        ));
-
         final String deliveryResourceEndpoint = serviceURI + "/api/v1/deliveries";
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(deliveryResourceEndpoint))
                 .header("Accept", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        DeliveryJsonConverter.toJson(weight, startingPlace, destinationPlace, targetTime).toString()
+                ))
                 .build();
 
         HttpResponse<String> response;
@@ -65,7 +50,7 @@ public class DeliveryServiceProxy implements DeliveryService {
         }
         final JsonObject responseBody = new JsonObject(response.body());
         if (responseBody.getString("result").equals("error")) {
-            throw new CreateDeliveryFailedException();
+            throw new CreateDeliveryFailedException("DeliveryService gave an error creating the delivery");
         }
         return new DeliveryId(responseBody.getString("deliveryId"));
     }
