@@ -11,4 +11,6 @@ public interface Delivery extends Aggregate<DeliveryId> {
     void updateDeliveryState(DeliveryState deliveryState);
 
     void addDeliveryObserver(DeliveryObserver observer);
+
+    void removeDeliveryObserver(DeliveryObserver observer);
 }

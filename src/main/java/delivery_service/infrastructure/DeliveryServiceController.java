@@ -34,6 +34,7 @@ public class DeliveryServiceController extends VerticleBase  {
 	static final String DELIVERY_RESOURCE_PATH =  DELIVERIES_RESOURCE_PATH +   "/:deliveryId";
 	static final String TRACK_RESOURCE_PATH =  DELIVERY_RESOURCE_PATH +   "/track";
 	static final String TRACKING_RESOURCE_PATH = DELIVERY_RESOURCE_PATH + "/:trackingSessionId";
+	static final String STOP_TRACKING_RESOURCE_PATH = TRACKING_RESOURCE_PATH + "/stop";
 	
 	/* Ref. to the application layer */
 	private final DeliveryService deliveryService;
@@ -52,6 +53,7 @@ public class DeliveryServiceController extends VerticleBase  {
 		router.route(HttpMethod.POST, DELIVERIES_RESOURCE_PATH).handler(this::createNewDelivery);
 		router.route(HttpMethod.GET, DELIVERY_RESOURCE_PATH).handler(this::getDeliveryDetail);
 		router.route(HttpMethod.POST, TRACK_RESOURCE_PATH).handler(this::trackDelivery);
+		router.route(HttpMethod.POST, STOP_TRACKING_RESOURCE_PATH).handler(this::stopTrackingDelivery);
 		router.route(HttpMethod.GET, TRACKING_RESOURCE_PATH).handler(this::getDeliveryStatus);
 		this.handleEventSubscription(server, "/api/events");
 
@@ -141,8 +143,8 @@ public class DeliveryServiceController extends VerticleBase  {
 	 */
 	protected void trackDelivery(final RoutingContext context) {
 		logger.log(Level.INFO, "TrackDelivery request - " + context.currentRoute().getPath());
-		context.request().handler(buf -> {
-			final DeliveryId deliveryId = new DeliveryId(buf.toJsonObject().getString("deliveryId"));
+		context.request().endHandler(h -> {
+			final DeliveryId deliveryId = new DeliveryId(context.pathParam("deliveryId"));
 			logger.log(Level.INFO, "Track delivery " + deliveryId.id());
 			var reply = new JsonObject();
 			try {
@@ -151,7 +153,28 @@ public class DeliveryServiceController extends VerticleBase  {
 				reply.put("trackingSessionId", trackingSession.getId());
 				reply.put("result", "ok");
 				sendReply(context.response(), reply);
-			} catch (final InvalidTrackingException ex) {
+			} catch (final DeliveryNotFoundException ex) {
+				reply.put("result", "error");
+				reply.put("error", ex.getMessage());
+				sendReply(context.response(), reply);
+			} catch (Exception ex1) {
+				sendError(context.response());
+			}
+		});
+	}
+
+	protected void stopTrackingDelivery(final RoutingContext context) {
+		logger.log(Level.INFO, "Stop tracking delivery request - " + context.currentRoute().getPath());
+		context.request().endHandler(h -> {
+			final DeliveryId deliveryId = new DeliveryId(context.pathParam("deliveryId"));
+			final String trackingSessionId = context.pathParam("trackingSessionId");
+			logger.log(Level.INFO, "Stop tracking delivery " + deliveryId.id());
+			var reply = new JsonObject();
+			try {
+				this.deliveryService.stopTrackingDelivery(deliveryId, trackingSessionId);
+				reply.put("result", "ok");
+				sendReply(context.response(), reply);
+			} catch (final DeliveryNotFoundException | TrackingSessionNotFoundException ex) {
 				reply.put("result", "error");
 				reply.put("error", ex.getMessage());
 				sendReply(context.response(), reply);

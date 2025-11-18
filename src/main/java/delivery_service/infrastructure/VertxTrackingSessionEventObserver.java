@@ -58,7 +58,14 @@ public class VertxTrackingSessionEventObserver implements TrackingSessionEventOb
 
 	@Override
 	public void delivered(final String trackingSessionId) {
-
+		logger.info("package delivered for " + trackingSessionId);
+		final JsonObject deliveredEvent = new JsonObject();
+		deliveredEvent.put("event", "delivered");
+		if (this.channelOnBusReady) {
+			this.eventBus.publish(trackingSessionId, deliveredEvent);
+		} else {
+			this.eventBuffer.add(deliveredEvent);
+		}
 	}
 
 	@Override
@@ -73,44 +80,4 @@ public class VertxTrackingSessionEventObserver implements TrackingSessionEventOb
 			this.eventBuffer.add(timeElapsedEvent);
 		}
 	}
-
-	public void gameStarted(String playerSessionId) {
-		logger.info("game-started for " + playerSessionId);
-		var evStarted = new JsonObject();
-		evStarted.put("event", "game-started");
-		if (channelOnBusReady) {
-			eventBus.publish(playerSessionId, evStarted);
-		} else {
-			eventBuffer.add(evStarted);
-		}
-	}					
-	
-	public void newMove(String playerSessionId, String who, int x, int y) {
-		var evMove = new JsonObject();
-		evMove.put("event", "new-move");
-		evMove.put("x", x);
-		evMove.put("y", y);
-		evMove.put("symbol", who);
-		if (channelOnBusReady) {
-			eventBus.publish(playerSessionId, evMove);
-		} else {
-			eventBuffer.add(evMove);
-		}
-	}
-
-	public void gameEnded(String playerSessionId, Optional<String> winner) {
-		var evEnd = new JsonObject();
-		evEnd.put("event", "game-ended");
-		if (winner.isEmpty()) {
-			evEnd.put("result", "tie");					
-		} else {
-			evEnd.put("winner", winner.get());											
-		}				
-		if (channelOnBusReady) {
-			eventBus.publish(playerSessionId, evEnd);
-		} else {
-			eventBuffer.add(evEnd);
-		}
-	}					
-	
 }

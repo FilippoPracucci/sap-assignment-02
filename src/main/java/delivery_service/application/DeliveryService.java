@@ -31,6 +31,7 @@ public interface DeliveryService {
 	 * @param deliveryId
 	 * @return
 	 * @throws DeliveryNotFoundException
+	 * @throws TrackingSessionNotFoundException
 	 */
 	DeliveryStatus getDeliveryStatus(DeliveryId deliveryId, String trackingSessionId)
 			throws DeliveryNotFoundException, TrackingSessionNotFoundException;
@@ -62,9 +63,21 @@ public interface DeliveryService {
 	 * @param deliveryId -- id of the delivery to be tracked
 	 * @param observer -- observer of the events
 	 * @return the tracking session
-	 * @throws InvalidTrackingException
+	 * @throws DeliveryNotFoundException
 	 */
 	TrackingSession trackDelivery(DeliveryId deliveryId, TrackingSessionEventObserver observer)
-			throws InvalidTrackingException;
-    
+			throws DeliveryNotFoundException;
+
+	/**
+	 *
+	 * Stop tracking a delivery -- called by a UserSession (logged in user), delete the TrackingSession with the
+	 * trackingSessionId given
+	 *
+	 * @param deliveryId -- id of the delivery to be tracked
+	 * @param trackingSessionId -- id of the TrackingSession to be deleted
+	 * @throws DeliveryNotFoundException
+	 * @throws TrackingSessionNotFoundException
+	 */
+	void stopTrackingDelivery(DeliveryId deliveryId, String trackingSessionId) throws DeliveryNotFoundException,
+			TrackingSessionNotFoundException;
 }

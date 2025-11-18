@@ -45,7 +45,7 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 
 	@Override
 	public TrackingSession getTrackingSession(final String trackingSessionId) throws TrackingSessionNotFoundException {
-		return this.trackingSessionRepository.getTrackingSession(trackingSessionId);
+		return this.trackingSessionRepository.getSession(trackingSessionId);
 	}
 
 	@Override
@@ -65,21 +65,24 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 
 	@Override
 	public TrackingSession trackDelivery(final DeliveryId deliveryId, final TrackingSessionEventObserver observer)
-			throws InvalidTrackingException {
+			throws DeliveryNotFoundException {
 		logger.log(Level.INFO, "Track delivery " + deliveryId);
-        final Delivery delivery;
-        try {
-            delivery = this.deliveryRepository.getDelivery(deliveryId);
-        } catch (final DeliveryNotFoundException e) {
-            throw new InvalidTrackingException();
-        }
 		final TrackingSession trackingSession = this.trackingSessionRepository.createSession();
 		trackingSession.bindTrackingSessionEventNotifier(observer);
-		delivery.addDeliveryObserver(trackingSession);
+		this.deliveryRepository.getDelivery(deliveryId).addDeliveryObserver(trackingSession);
 		return trackingSession;
 	}
-	
-    public void bindDeliveryRepository(final DeliveryRepository repo) {
+
+	@Override
+	public void stopTrackingDelivery(final DeliveryId deliveryId, final String trackingSessionId)
+			throws DeliveryNotFoundException, TrackingSessionNotFoundException {
+		logger.log(Level.INFO, "Stop tracking delivery " + deliveryId);
+		this.deliveryRepository.getDelivery(deliveryId)
+				.removeDeliveryObserver(this.trackingSessionRepository.getSession(trackingSessionId));
+		this.trackingSessionRepository.removeSession(trackingSessionId);
+	}
+
+	public void bindDeliveryRepository(final DeliveryRepository repo) {
     	this.deliveryRepository = repo;
 		this.deliveryRepository.getAllDeliveries().stream()
 				.filter(delivery -> !delivery.getDeliveryStatus().getState().equals(DeliveryState.DELIVERED))

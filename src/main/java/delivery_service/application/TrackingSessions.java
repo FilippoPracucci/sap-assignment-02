@@ -27,7 +27,13 @@ public class TrackingSessions implements Repository {
 		return trackingSession;
 	}
 
-	public TrackingSession getTrackingSession(final String trackingSessionId) throws TrackingSessionNotFoundException {
+	public void removeSession(final String trackingSessionId) throws TrackingSessionNotFoundException {
+		if (this.trackingSessions.remove(trackingSessionId) == null) {
+			throw new TrackingSessionNotFoundException();
+		}
+	}
+
+	public TrackingSession getSession(final String trackingSessionId) throws TrackingSessionNotFoundException {
 		if (!this.isPresent(trackingSessionId)) {
 			throw new TrackingSessionNotFoundException();
 		}

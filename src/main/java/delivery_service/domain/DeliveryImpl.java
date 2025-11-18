@@ -86,6 +86,11 @@ public class DeliveryImpl implements Delivery, DroneObserver {
     }
 
     @Override
+    public void removeDeliveryObserver(final DeliveryObserver observer) {
+        this.observers.remove(observer);
+    }
+
+    @Override
     public DeliveryId getId() {
         return this.id;
     }
