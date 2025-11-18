@@ -11,6 +11,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Calendar;
+import java.util.Optional;
 
 @Adapter
 public class DeliveryServiceProxy implements DeliveryService {
@@ -23,7 +24,7 @@ public class DeliveryServiceProxy implements DeliveryService {
 
     @Override
     public DeliveryId createNewDelivery(final double weight, final Address startingPlace,
-                                        final Address destinationPlace, final Calendar targetTime)
+                                        final Address destinationPlace, final Optional<Calendar> targetTime)
             throws CreateDeliveryFailedException, ServiceNotAvailableException {
         HttpClient client = HttpClient.newHttpClient();
         final String deliveryResourceEndpoint = serviceURI + "/api/v1/deliveries";

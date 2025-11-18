@@ -4,6 +4,7 @@ import delivery_service.domain.Address;
 import lobby_service.domain.*;
 
 import java.util.Calendar;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,7 +36,7 @@ public class LobbyServiceImpl implements LobbyService {
 
 	@Override
 	public DeliveryId createNewDelivery(final String userSessionId, final double weight, final Address startingPlace,
-										final Address destinationPlace, final Calendar targetTime)
+										final Address destinationPlace, final Optional<Calendar> targetTime)
 			throws CreateDeliveryFailedException {
 		try {
 			if (this.userSessionRepository.isPresent(userSessionId)) {

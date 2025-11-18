@@ -15,6 +15,7 @@ import io.vertx.ext.web.handler.StaticHandler;
 
 import java.time.Instant;
 import java.util.Calendar;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -116,8 +117,8 @@ public class LobbyServiceController extends VerticleBase  {
 			String userSessionId = context.pathParam("sessionId");
 			var reply = new JsonObject();
 			try {
-				final Calendar targetTime = DeliveryJsonConverter.getTargetTime(deliveryDetailJson);
-				if (targetTime.toInstant().isBefore(Instant.now())) {
+				final Optional<Calendar> targetTime = DeliveryJsonConverter.getTargetTime(deliveryDetailJson);
+				if (targetTime.isPresent() && targetTime.get().toInstant().isBefore(Instant.now())) {
 					reply.put("result", "error");
 					reply.put("error", "past-target-time");
 				} else {

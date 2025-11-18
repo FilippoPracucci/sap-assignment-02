@@ -84,9 +84,9 @@ public class DeliveryServiceController extends VerticleBase  {
 			final JsonObject deliveryDetailJson = buf.toJsonObject();
 			logger.log(Level.INFO, "Payload: " + deliveryDetailJson);
 			var reply = new JsonObject();
-			try {	// TODO add immediate time
+			try {
 				final Calendar targetTime = DeliveryJsonConverter.getTargetTime(deliveryDetailJson);
-				if (targetTime.toInstant().isBefore(Instant.now())) {
+				if (deliveryDetailJson.containsKey("targetTime") && targetTime.toInstant().isBefore(Instant.now())) {
 					reply.put("result", "error");
 					reply.put("error", "past-target-time");
 				} else {

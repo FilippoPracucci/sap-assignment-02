@@ -3,7 +3,9 @@ package delivery_service.infrastructure;
 import delivery_service.domain.*;
 import io.vertx.core.json.JsonObject;
 
+import java.time.Instant;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,15 +30,17 @@ public class DeliveryJsonConverter {
     }
 
     public static Calendar getTargetTime(final JsonObject json) {
-        return new Calendar.Builder().setDate(
-                json.getJsonObject("targetTime").getNumber("year").intValue(),
-                json.getJsonObject("targetTime").getNumber("month").intValue() - 1,
-                json.getJsonObject("targetTime").getNumber("day").intValue()
-        ).setTimeOfDay(
-                json.getJsonObject("targetTime").getNumber("hours").intValue(),
-                json.getJsonObject("targetTime").getNumber("minutes").intValue(),
-                0
-        ).build();
+        return json.containsKey("targetTime")
+                ? new Calendar.Builder().setDate(
+                        json.getJsonObject("targetTime").getNumber("year").intValue(),
+                        json.getJsonObject("targetTime").getNumber("month").intValue() - 1,
+                        json.getJsonObject("targetTime").getNumber("day").intValue()
+                ).setTimeOfDay(
+                        json.getJsonObject("targetTime").getNumber("hours").intValue(),
+                        json.getJsonObject("targetTime").getNumber("minutes").intValue(),
+                        0
+                ).build()
+                : new Calendar.Builder().setInstant(Date.from(Instant.now())).build();
     }
 
     public static JsonObject toJson(final DeliveryDetail deliveryDetail, final Optional<DeliveryState> deliveryState) {

@@ -37,29 +37,9 @@ public class DeliveryImpl implements Delivery, DroneObserver {
             final Address destinationPlace,
             final Calendar expectedShippingDate
     ) {
-        this(deliveryId, weight, startingPlace, destinationPlace, Optional.of(expectedShippingDate));
-    }
-
-    public DeliveryImpl(
-            final DeliveryId deliveryId,
-            final double weight,
-            final Address startingPlace,
-            final Address destinationPlace
-    ) {
-        this(deliveryId, weight, startingPlace, destinationPlace, Optional.empty());
-    }
-
-    private DeliveryImpl(
-            final DeliveryId deliveryId,
-            final double weight,
-            final Address startingPlace,
-            final Address destinationPlace,
-            final Optional<Calendar> expectedShippingDate
-    ) {
         this.id = deliveryId;
-        this.deliveryDetail = expectedShippingDate
-                .map(date -> new DeliveryDetailImpl(this.id, weight, startingPlace, destinationPlace, date))
-                .orElseGet(() -> new DeliveryDetailImpl(this.id, weight, startingPlace, destinationPlace));
+        this.deliveryDetail = new DeliveryDetailImpl(this.id, weight, startingPlace, destinationPlace,
+                expectedShippingDate);
         this.deliveryStatus = new DeliveryStatusImpl(this.id);
         this.observers = new ArrayList<>();
         this.initDrone();

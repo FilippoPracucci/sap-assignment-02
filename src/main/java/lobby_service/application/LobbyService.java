@@ -5,6 +5,7 @@ import delivery_service.domain.Address;
 import lobby_service.domain.DeliveryId;
 
 import java.util.Calendar;
+import java.util.Optional;
 
 /**
  * 
@@ -17,7 +18,7 @@ public interface LobbyService {
 	String login(String userName, String password) throws LoginFailedException;
 	
 	DeliveryId createNewDelivery(String userSessionId, double weight, Address startingPlace, Address destinationPlace,
-								 Calendar targetTime) throws CreateDeliveryFailedException;
+								 Optional<Calendar> targetTime) throws CreateDeliveryFailedException;
 	
 	String trackDelivery(String userSessionId, DeliveryId deliveryId) throws TrackDeliveryFailedException;
     
