@@ -14,7 +14,9 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -89,6 +91,10 @@ public class DeliveryServiceController extends VerticleBase  {
 				if (deliveryDetailJson.containsKey("targetTime") && targetTime.toInstant().isBefore(Instant.now())) {
 					reply.put("result", "error");
 					reply.put("error", "past-target-time");
+				} if (deliveryDetailJson.containsKey("targetTime")
+						&& targetTime.toInstant().isAfter(Instant.now().plus(14, ChronoUnit.DAYS))) {
+					reply.put("result", "error");
+					reply.put("error", "target-time-too-far");
 				} else {
 					final DeliveryId deliveryId = this.deliveryService.createNewDelivery(
 							deliveryDetailJson.getNumber("weight").doubleValue(),

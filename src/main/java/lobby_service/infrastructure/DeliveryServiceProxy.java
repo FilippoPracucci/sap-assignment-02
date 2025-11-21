@@ -51,7 +51,7 @@ public class DeliveryServiceProxy implements DeliveryService {
         }
         final JsonObject responseBody = new JsonObject(response.body());
         if (responseBody.getString("result").equals("error")) {
-            throw new CreateDeliveryFailedException("DeliveryService gave an error creating the delivery");
+            throw new CreateDeliveryFailedException("Invalid shipping time: " + responseBody.getString("error"));
         }
         return new DeliveryId(responseBody.getString("deliveryId"));
     }
