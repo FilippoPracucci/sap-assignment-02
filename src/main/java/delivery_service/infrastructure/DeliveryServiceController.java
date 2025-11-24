@@ -87,12 +87,12 @@ public class DeliveryServiceController extends VerticleBase  {
 			logger.log(Level.INFO, "Payload: " + deliveryDetailJson);
 			var reply = new JsonObject();
 			try {
-				final Calendar targetTime = DeliveryJsonConverter.getTargetTime(deliveryDetailJson);
-				if (deliveryDetailJson.containsKey("targetTime") && targetTime.toInstant().isBefore(Instant.now())) {
+				final Optional<Calendar> targetTime = DeliveryJsonConverter.getTargetTime(deliveryDetailJson);
+				if (targetTime.isPresent() && targetTime.get().toInstant().isBefore(Instant.now())) {
 					reply.put("result", "error");
 					reply.put("error", "past-target-time");
-				} if (deliveryDetailJson.containsKey("targetTime")
-						&& targetTime.toInstant().isAfter(Instant.now().plus(14, ChronoUnit.DAYS))) {
+				} if (targetTime.isPresent()
+						&& targetTime.get().toInstant().isAfter(Instant.now().plus(14, ChronoUnit.DAYS))) {
 					reply.put("result", "error");
 					reply.put("error", "target-time-too-far");
 				} else {
@@ -138,7 +138,7 @@ public class DeliveryServiceController extends VerticleBase  {
 				sendReply(context.response(), reply);
 			} catch (final DeliveryNotFoundException ex) {
 				reply.put("result", "error");
-				reply.put("error", "delivery-not-present");
+				reply.put("error", ex.getMessage());
 				sendReply(context.response(), reply);
 			} catch (Exception ex) {
 				sendError(context.response());
@@ -223,7 +223,7 @@ public class DeliveryServiceController extends VerticleBase  {
 				sendReply(context.response(), reply);
 			} catch (final DeliveryNotFoundException ex) {
 				reply.put("result", "error");
-				reply.put("error", "delivery-not-present");
+				reply.put("error", ex.getMessage());
 				sendReply(context.response(), reply);
 			} catch (final TrackingSessionNotFoundException ex) {
 				reply.put("result", "error");

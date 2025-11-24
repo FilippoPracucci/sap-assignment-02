@@ -84,7 +84,7 @@ public class DeliveryServiceProxy implements DeliveryService {
         }
         final JsonObject responseBody = new JsonObject(response.body());
         if (responseBody.getString("result").equals("error")) {
-            throw new TrackDeliveryFailedException();
+            throw new TrackDeliveryFailedException(responseBody.getString("error"));
         }
         return responseBody.getString("trackingSessionId");
     }

@@ -5,6 +5,7 @@ import delivery_service.domain.*;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * 
@@ -54,7 +55,7 @@ public interface DeliveryService {
 	DeliveryId createNewDelivery(double weight,
 								 Address startingPlace,
 								 Address destinationPlace,
-								 Calendar expectedShippingDate);
+								 Optional<Calendar> expectedShippingDate);
 	
 	/**
 	 * 

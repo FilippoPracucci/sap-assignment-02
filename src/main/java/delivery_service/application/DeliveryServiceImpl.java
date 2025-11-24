@@ -3,6 +3,7 @@ package delivery_service.application;
 import delivery_service.domain.*;
 
 import java.util.Calendar;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,7 +51,7 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 
 	@Override
 	public DeliveryId createNewDelivery(final double weight, final Address startingPlace,
-										final Address destinationPlace, final Calendar expectedShippingDate) {
+										final Address destinationPlace, final Optional<Calendar> expectedShippingDate) {
 		final Delivery delivery = new DeliveryImpl(this.deliveryRepository.getNextId(), weight, startingPlace,
 				destinationPlace, expectedShippingDate);
 		delivery.addDeliveryObserver(this);

@@ -16,12 +16,14 @@ public class DeliveryImpl implements Delivery, DroneObserver {
             final double weight,
             final Address startingPlace,
             final Address destinationPlace,
-            final Calendar expectedShippingDate,
+            final Optional<Calendar> expectedShippingDate,
             final DeliveryState deliveryState
     ) {
         this.id = deliveryId;
         this.deliveryDetail = new DeliveryDetailImpl(this.id, weight, startingPlace, destinationPlace,
-                expectedShippingDate);
+                expectedShippingDate.orElseGet(() ->
+                        new Calendar.Builder().setInstant(Date.from(Instant.now())).build())
+        );
         this.deliveryStatus = new DeliveryStatusImpl(this.id);
         this.deliveryStatus.setDeliveryState(deliveryState);
         this.observers = new ArrayList<>();
@@ -35,11 +37,13 @@ public class DeliveryImpl implements Delivery, DroneObserver {
             final double weight,
             final Address startingPlace,
             final Address destinationPlace,
-            final Calendar expectedShippingDate
+            final Optional<Calendar> expectedShippingDate
     ) {
         this.id = deliveryId;
         this.deliveryDetail = new DeliveryDetailImpl(this.id, weight, startingPlace, destinationPlace,
-                expectedShippingDate);
+                expectedShippingDate.orElseGet(() ->
+                        new Calendar.Builder().setInstant(Date.from(Instant.now())).build())
+        );
         this.deliveryStatus = new DeliveryStatusImpl(this.id);
         this.observers = new ArrayList<>();
         this.initDrone();
@@ -94,11 +98,13 @@ public class DeliveryImpl implements Delivery, DroneObserver {
         drone.addDroneObserver(this);
         Thread.ofVirtual().start(() -> {
             try {
-                System.out.println("Waiting " + Instant.now().until(this.deliveryDetail.expectedShippingDate().toInstant(),
-                        ChronoUnit.MILLIS) / 1000);
                 System.out.println("ExpectedShippingDate " + this.deliveryDetail.expectedShippingDate().toInstant());
-                Thread.sleep(Instant.now().until(this.deliveryDetail.expectedShippingDate().toInstant(),
-                        ChronoUnit.MILLIS) / 1000); // TODO change for testing
+                if (this.deliveryDetail.expectedShippingDate().toInstant().isAfter(Instant.now())) {
+                    System.out.println("Waiting " + Instant.now().until(
+                            this.deliveryDetail.expectedShippingDate().toInstant(), ChronoUnit.MILLIS) / 1000);
+                    Thread.sleep(Instant.now().until(this.deliveryDetail.expectedShippingDate().toInstant(),
+                            ChronoUnit.MILLIS) / 1000); // TODO change for testing
+                }
                 drone.startDrone();
             } catch (final InterruptedException e) {
                 throw new RuntimeException(e);
