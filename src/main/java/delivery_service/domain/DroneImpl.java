@@ -7,6 +7,7 @@ class DroneImpl implements Drone, Runnable {
 
     private static final int DURATION_MULTIPLIER = 5;
     private static final int HOUR_IN_SECONDS = 1000;// 3600;
+    private static final int HOURS_IN_A_DAY = 24;
     private static final int PERIOD_IN_HOURS = 1;
 
     private final List<DroneObserver> droneObservers;
@@ -28,7 +29,10 @@ class DroneImpl implements Drone, Runnable {
     public void run() {
         this.notifyDeliveryEvent(new Shipped(
                 this.deliveryDetail.getId(),
-                new DeliveryTime(this.deliveryDurationInHours / 24, this.deliveryDurationInHours % 24)
+                new DeliveryTime(
+                        this.deliveryDurationInHours / HOURS_IN_A_DAY,
+                        this.deliveryDurationInHours % HOURS_IN_A_DAY
+                )
         ));
         for (int i = 0; i < this.deliveryDurationInHours; i++) {
             try {

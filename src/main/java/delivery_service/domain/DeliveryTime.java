@@ -11,10 +11,8 @@ public record DeliveryTime(int days, int hours) implements ValueObject {
 
     public DeliveryTime sub(final DeliveryTime time) {
         final int hoursSubtracted = this.hours - time.hours;
-        return new DeliveryTime(
-                Math.max(this.days - time.days - (hoursSubtracted < 0 ? 1 : 0), 0),
-                (hoursSubtracted + 24) % 24
-        );
+        final int newDays = Math.max(this.days - time.days - (hoursSubtracted < 0 ? 1 : 0), 0);
+        return new DeliveryTime(newDays, (newDays == 0 && hoursSubtracted < 0) ? 0 : (hoursSubtracted + 24) % 24);
     }
 
     @Override
