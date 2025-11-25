@@ -1,0 +1,4 @@
+- _Delivery state_: stato corrente della spedizione, come `READY_TO_SHIP, SHIPPING, DELIVERED`;
+- _Delivery status_: composizione del DeliveryState e del tempo rimanente alla consegna;
+- _Place_: indirizzo composto da via e numero civico, utilizzato come punto di partenza e di arrivo;
+- _Expected shipping date_: la data e l'orario specificati dall'utente per l'invio del pacco.
