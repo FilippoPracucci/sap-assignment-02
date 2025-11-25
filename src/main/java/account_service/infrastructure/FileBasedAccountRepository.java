@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * 
  */
 @Adapter
-public class SimpleFileBasedAccountRepository implements AccountRepository {
+public class FileBasedAccountRepository implements AccountRepository {
 	static Logger logger = Logger.getLogger("[AccountDB]");
 
 	private static final String USER_PREFIX = "user-";
@@ -33,7 +33,7 @@ public class SimpleFileBasedAccountRepository implements AccountRepository {
 	
 	private final HashMap<UserId, Account> userAccounts;
 	
-	public SimpleFileBasedAccountRepository() {
+	public FileBasedAccountRepository() {
 		this.userAccounts = new HashMap<>();
 		initFromDB();
 	}

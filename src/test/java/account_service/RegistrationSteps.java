@@ -3,7 +3,7 @@ package account_service;
 import account_service.application.AccountRepository;
 import account_service.application.AccountServiceImpl;
 import account_service.domain.UserId;
-import account_service.infrastructure.SimpleFileBasedAccountRepository;
+import account_service.infrastructure.FileBasedAccountRepository;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -21,7 +21,7 @@ public class RegistrationSteps {
     
 	public RegistrationSteps(){
         this.accountService = new AccountServiceImpl();
-        this.accountRepository = new SimpleFileBasedAccountRepository();
+        this.accountRepository = new FileBasedAccountRepository();
         this.accountService.bindAccountRepository(this.accountRepository);
 	}
 	

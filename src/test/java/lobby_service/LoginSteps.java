@@ -4,7 +4,7 @@ import account_service.application.AccountRepository;
 import account_service.application.AccountServiceImpl;
 import account_service.domain.UserId;
 import account_service.infrastructure.AccountServiceController;
-import account_service.infrastructure.SimpleFileBasedAccountRepository;
+import account_service.infrastructure.FileBasedAccountRepository;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -28,7 +28,7 @@ public class LoginSteps {
 	public LoginSteps(){
         this.lobbyService = new LobbyServiceImpl();
         this.lobbyService.bindAccountService(new AccountServiceProxy("http://localhost:9000"));
-        this.accountRepository = new SimpleFileBasedAccountRepository();
+        this.accountRepository = new FileBasedAccountRepository();
         var accountService = new AccountServiceImpl();
         accountService.bindAccountRepository(this.accountRepository);
         Vertx.vertx().deployVerticle(new AccountServiceController(accountService, 9000));

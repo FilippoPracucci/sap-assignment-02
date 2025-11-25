@@ -11,7 +11,7 @@ public class AccountServiceMain {
 		
 		var service = new AccountServiceImpl();
 		
-		service.bindAccountRepository(new SimpleFileBasedAccountRepository());
+		service.bindAccountRepository(new FileBasedAccountRepository());
 		
 		var vertx = Vertx.vertx();
 		var server = new AccountServiceController(service, ACCOUNT_SERVICE_PORT);

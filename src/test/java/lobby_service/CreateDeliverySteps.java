@@ -1,10 +1,8 @@
 package lobby_service;
 
-import account_service.application.AccountRepository;
 import account_service.application.AccountServiceImpl;
-import account_service.domain.UserId;
 import account_service.infrastructure.AccountServiceController;
-import account_service.infrastructure.SimpleFileBasedAccountRepository;
+import account_service.infrastructure.FileBasedAccountRepository;
 import delivery_service.application.DeliveryRepository;
 import delivery_service.application.DeliveryServiceImpl;
 import delivery_service.domain.Address;
@@ -45,7 +43,7 @@ public class CreateDeliverySteps {
         this.lobbyService = new LobbyServiceImpl();
         this.lobbyService.bindAccountService(new AccountServiceProxy("http://localhost:9000"));
         var accountService = new AccountServiceImpl();
-        accountService.bindAccountRepository(new SimpleFileBasedAccountRepository());
+        accountService.bindAccountRepository(new FileBasedAccountRepository());
         Vertx.vertx().deployVerticle(new AccountServiceController(accountService, 9000));
         this.lobbyService.bindDeliveryService(new DeliveryServiceProxy("http://localhost:9002"));
         final var deliveryService = new DeliveryServiceImpl();

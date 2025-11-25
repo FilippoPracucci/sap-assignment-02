@@ -1,5 +1,6 @@
 package delivery_service.application;
 
+import common.ddd.Entity;
 import delivery_service.domain.*;
 
 import java.util.logging.Logger;
@@ -12,7 +13,7 @@ import java.util.logging.Logger;
  * - It acts as observer of events generated while tracking.
  * 
  */
-public class TrackingSession implements DeliveryObserver {
+public class TrackingSession implements DeliveryObserver, Entity<String> {
 
 	static Logger logger = Logger.getLogger("[Tracking Session]");
 	private final String trackingSessionId;
@@ -21,7 +22,8 @@ public class TrackingSession implements DeliveryObserver {
 	public TrackingSession(final String trackingSessionId) {
 		this.trackingSessionId = trackingSessionId;
 	}
-	
+
+	@Override
 	public String getId() {
 		return this.trackingSessionId;
 	}

@@ -1,7 +1,7 @@
 package account_service.application;
 
 import account_service.domain.Account;
-import account_service.infrastructure.SimpleFileBasedAccountRepository;
+import account_service.infrastructure.FileBasedAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ public class AccountServiceTest {
     @BeforeEach
     public void setUp() {
         this.accountService = new AccountServiceImpl();
-        this.accountService.bindAccountRepository(new SimpleFileBasedAccountRepository());
+        this.accountService.bindAccountRepository(new FileBasedAccountRepository());
         this.account = this.accountService.registerUser("John", "Secret#123");
     }
 
