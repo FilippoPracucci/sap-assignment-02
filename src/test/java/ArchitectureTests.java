@@ -1,5 +1,6 @@
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.core.importer.ImportOption;
 import common.hexagonal.Adapter;
 import common.hexagonal.InBoundPort;
 import common.hexagonal.OutBoundPort;
@@ -13,10 +14,12 @@ import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
 public class ArchitectureTests {
 
+	final ClassFileImporter importer = new ClassFileImporter().withImportOption(new ImportOption.DoNotIncludeTests());
+
 	final Set<JavaClasses> importedClasses = Set.of(
-			new ClassFileImporter().importPackages("account_service"),
-			new ClassFileImporter().importPackages("delivery_service"),
-			new ClassFileImporter().importPackages("lobby_service")
+			importer.importPackages("account_service"),
+			importer.importPackages("delivery_service"),
+			importer.importPackages("lobby_service")
 	);
 	final String domainPackage = "..domain..";
 	final String applicationPackage = "..application..";
