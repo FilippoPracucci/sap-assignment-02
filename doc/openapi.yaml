@@ -213,7 +213,7 @@ paths:
               number:
                 description: the delivery destination place number
                 type: number
-        - name: targetTime
+        - name: expectedShippingMoment
           in: query
           description: the desired time to deliver the package
           required: false
@@ -329,7 +329,7 @@ components:
               description: the delivery destination place number
               type: number
           description: the delivery destination place
-        targetTime:
+        expectedShippingMoment:
           properties:
             year:
               description: the desired year to deliver the package
