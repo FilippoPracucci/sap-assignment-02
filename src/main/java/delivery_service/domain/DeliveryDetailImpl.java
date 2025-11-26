@@ -7,7 +7,7 @@ public record DeliveryDetailImpl(
         double weight,
         Address startingPlace,
         Address destinationPlace,
-        Calendar expectedShippingDate
+        Calendar expectedShippingMoment
 ) implements DeliveryDetail {
 
     @Override

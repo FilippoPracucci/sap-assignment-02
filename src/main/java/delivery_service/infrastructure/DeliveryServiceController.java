@@ -87,12 +87,12 @@ public class DeliveryServiceController extends VerticleBase  {
 			logger.log(Level.INFO, "Payload: " + deliveryDetailJson);
 			var reply = new JsonObject();
 			try {
-				final Optional<Calendar> targetTime = DeliveryJsonConverter.getTargetTime(deliveryDetailJson);
-				if (targetTime.isPresent() && targetTime.get().toInstant().isBefore(Instant.now())) {
+				final Optional<Calendar> expectedShippingMoment = DeliveryJsonConverter.getExpectedShippingMoment(deliveryDetailJson);
+				if (expectedShippingMoment.isPresent() && expectedShippingMoment.get().toInstant().isBefore(Instant.now())) {
 					reply.put("result", "error");
 					reply.put("error", "past-target-time");
-				} if (targetTime.isPresent()
-						&& targetTime.get().toInstant().isAfter(Instant.now().plus(14, ChronoUnit.DAYS))) {
+				} if (expectedShippingMoment.isPresent()
+						&& expectedShippingMoment.get().toInstant().isAfter(Instant.now().plus(14, ChronoUnit.DAYS))) {
 					reply.put("result", "error");
 					reply.put("error", "target-time-too-far");
 				} else {
@@ -100,7 +100,7 @@ public class DeliveryServiceController extends VerticleBase  {
 							deliveryDetailJson.getNumber("weight").doubleValue(),
 							DeliveryJsonConverter.getAddress(deliveryDetailJson, "startingPlace"),
 							DeliveryJsonConverter.getAddress(deliveryDetailJson, "destinationPlace"),
-							targetTime
+							expectedShippingMoment
 					);
 					reply.put("result", "ok");
 					reply.put("deliveryId", deliveryId.id());

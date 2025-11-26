@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface DeliveryService {
 
 	DeliveryId createNewDelivery(double weight, Address startingPlace,Address destinationPlace,
-								 Optional<Calendar> targetTime)
+								 Optional<Calendar> expectedShippingMoment)
 			throws CreateDeliveryFailedException, ServiceNotAvailableException;
 	
 	String trackDelivery(DeliveryId deliveryId) throws TrackDeliveryFailedException, ServiceNotAvailableException;

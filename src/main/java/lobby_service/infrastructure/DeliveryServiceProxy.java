@@ -24,7 +24,7 @@ public class DeliveryServiceProxy implements DeliveryService {
 
     @Override
     public DeliveryId createNewDelivery(final double weight, final Address startingPlace,
-                                        final Address destinationPlace, final Optional<Calendar> targetTime)
+                                        final Address destinationPlace, final Optional<Calendar> expectedShippingMoment)
             throws CreateDeliveryFailedException, ServiceNotAvailableException {
         HttpClient client = HttpClient.newHttpClient();
         final String deliveryResourceEndpoint = serviceURI + "/api/v1/deliveries";
@@ -32,7 +32,7 @@ public class DeliveryServiceProxy implements DeliveryService {
                 .uri(URI.create(deliveryResourceEndpoint))
                 .header("Accept", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(
-                        DeliveryJsonConverter.toJson(weight, startingPlace, destinationPlace, targetTime).toString()
+                        DeliveryJsonConverter.toJson(weight, startingPlace, destinationPlace, expectedShippingMoment).toString()
                 ))
                 .build();
 

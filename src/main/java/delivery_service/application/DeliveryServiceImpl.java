@@ -51,9 +51,9 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 
 	@Override
 	public DeliveryId createNewDelivery(final double weight, final Address startingPlace,
-										final Address destinationPlace, final Optional<Calendar> expectedShippingDate) {
+										final Address destinationPlace, final Optional<Calendar> expectedShippingMoment) {
 		final Delivery delivery = new DeliveryImpl(this.deliveryRepository.getNextId(), weight, startingPlace,
-				destinationPlace, expectedShippingDate);
+				destinationPlace, expectedShippingMoment);
 		delivery.addDeliveryObserver(this);
 		logger.log(Level.INFO, "create New Delivery " + delivery.getId().id());
         try {

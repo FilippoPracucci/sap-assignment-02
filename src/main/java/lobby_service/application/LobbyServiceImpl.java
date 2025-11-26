@@ -38,12 +38,12 @@ public class LobbyServiceImpl implements LobbyService {
 
 	@Override
 	public DeliveryId createNewDelivery(final String userSessionId, final double weight, final Address startingPlace,
-										final Address destinationPlace, final Optional<Calendar> targetTime)
+										final Address destinationPlace, final Optional<Calendar> expectedShippingMoment)
 			throws CreateDeliveryFailedException {
 		try {
 			if (this.userSessionRepository.isPresent(userSessionId)) {
 				final DeliveryId deliveryId = this.deliveryService.createNewDelivery(weight, startingPlace,
-						destinationPlace, targetTime);
+						destinationPlace, expectedShippingMoment);
 				logger.log(Level.INFO, "create new delivery " + deliveryId.id() + " by " + userSessionId);
 				return deliveryId;
 			} else {

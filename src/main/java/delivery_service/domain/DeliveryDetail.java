@@ -12,5 +12,5 @@ public interface DeliveryDetail extends Entity<DeliveryId> {
 
     Address destinationPlace();
 
-    Calendar expectedShippingDate();
+    Calendar expectedShippingMoment();
 }

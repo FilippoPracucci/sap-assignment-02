@@ -17,7 +17,7 @@ public class DeliveryJsonConverter {
                 json.getNumber("weight").doubleValue(),
                 getAddress(json, "startingPlace"),
                 getAddress(json, "destinationPlace"),
-                getTargetTime(json),
+                getExpectedShippingMoment(json),
                 DeliveryState.valueOfLabel(json.getString("state"))
         );
     }
@@ -29,15 +29,15 @@ public class DeliveryJsonConverter {
         );
     }
 
-    public static Optional<Calendar> getTargetTime(final JsonObject json) {
-        return json.containsKey("targetTime")
+    public static Optional<Calendar> getExpectedShippingMoment(final JsonObject json) {
+        return json.containsKey("expectedShippingMoment")
                 ? Optional.of(new Calendar.Builder().setDate(
-                        json.getJsonObject("targetTime").getNumber("year").intValue(),
-                        json.getJsonObject("targetTime").getNumber("month").intValue() - 1,
-                        json.getJsonObject("targetTime").getNumber("day").intValue()
+                        json.getJsonObject("expectedShippingMoment").getNumber("year").intValue(),
+                        json.getJsonObject("expectedShippingMoment").getNumber("month").intValue() - 1,
+                        json.getJsonObject("expectedShippingMoment").getNumber("day").intValue()
                 ).setTimeOfDay(
-                        json.getJsonObject("targetTime").getNumber("hours").intValue(),
-                        json.getJsonObject("targetTime").getNumber("minutes").intValue(),
+                        json.getJsonObject("expectedShippingMoment").getNumber("hours").intValue(),
+                        json.getJsonObject("expectedShippingMoment").getNumber("minutes").intValue(),
                         0
                 ).build())
                 : Optional.empty();
@@ -55,12 +55,12 @@ public class DeliveryJsonConverter {
                 "street", deliveryDetail.destinationPlace().street(),
                 "number", deliveryDetail.destinationPlace().number())
         ));
-        obj.put("targetTime", new JsonObject(Map.of(
-                "year", deliveryDetail.expectedShippingDate().get(Calendar.YEAR),
-                "month", deliveryDetail.expectedShippingDate().get(Calendar.MONTH) + 1,
-                "day", deliveryDetail.expectedShippingDate().get(Calendar.DAY_OF_MONTH),
-                "hours", deliveryDetail.expectedShippingDate().get(Calendar.HOUR_OF_DAY),
-                "minutes", deliveryDetail.expectedShippingDate().get(Calendar.MINUTE))
+        obj.put("expectedShippingMoment", new JsonObject(Map.of(
+                "year", deliveryDetail.expectedShippingMoment().get(Calendar.YEAR),
+                "month", deliveryDetail.expectedShippingMoment().get(Calendar.MONTH) + 1,
+                "day", deliveryDetail.expectedShippingMoment().get(Calendar.DAY_OF_MONTH),
+                "hours", deliveryDetail.expectedShippingMoment().get(Calendar.HOUR_OF_DAY),
+                "minutes", deliveryDetail.expectedShippingMoment().get(Calendar.MINUTE))
         ));
         deliveryState.ifPresent(state -> obj.put("state", state.getLabel()));
         return obj;

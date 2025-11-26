@@ -72,7 +72,7 @@ public class CreateDeliverySteps {
             final String weight,
             final String startingPlace,
             final String destinationPlace,
-            final Optional<Calendar> targetTime
+            final Optional<Calendar> expectedShippingMoment
     ) {
         final String[] startingStreet = startingPlace.split(", ");
         final String[] destinationStreet = destinationPlace.split(", ");
@@ -82,7 +82,7 @@ public class CreateDeliverySteps {
                     Double.parseDouble(weight),
                     new Address(startingStreet[0], Integer.parseInt(startingStreet[1])),
                     new Address(destinationStreet[0], Integer.parseInt(destinationStreet[1])),
-                    targetTime
+                    expectedShippingMoment
             ).id();
         } catch (final CreateDeliveryFailedException e) {
             this.lastError = e.getMessage();
@@ -111,12 +111,12 @@ public class CreateDeliverySteps {
             final String weight,
             final String startingPlace,
             final String destinationPlace,
-            final String targetTime) {
+            final String expectedShippingMoment) {
         System.out.println("time: " + (new Calendar.Builder().setInstant(
-                Date.from(Instant.now().plus(Integer.parseInt(targetTime), ChronoUnit.DAYS))).build()).toInstant());
+                Date.from(Instant.now().plus(Integer.parseInt(expectedShippingMoment), ChronoUnit.DAYS))).build()).toInstant());
         this.createDelivery(weight, startingPlace, destinationPlace,
                 Optional.of(new Calendar.Builder().setInstant(
-                        Date.from(Instant.now().plus(Integer.parseInt(targetTime), ChronoUnit.DAYS))).build()
+                        Date.from(Instant.now().plus(Integer.parseInt(expectedShippingMoment), ChronoUnit.DAYS))).build()
                 )
         );
     }

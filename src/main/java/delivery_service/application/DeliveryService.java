@@ -55,7 +55,7 @@ public interface DeliveryService {
 	DeliveryId createNewDelivery(double weight,
 								 Address startingPlace,
 								 Address destinationPlace,
-								 Optional<Calendar> expectedShippingDate);
+								 Optional<Calendar> expectedShippingMoment);
 	
 	/**
 	 * 

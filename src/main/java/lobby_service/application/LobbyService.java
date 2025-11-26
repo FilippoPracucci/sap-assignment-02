@@ -18,7 +18,7 @@ public interface LobbyService {
 	String login(String userName, String password) throws LoginFailedException;
 	
 	DeliveryId createNewDelivery(String userSessionId, double weight, Address startingPlace, Address destinationPlace,
-								 Optional<Calendar> targetTime) throws CreateDeliveryFailedException;
+								 Optional<Calendar> expectedShippingMoment) throws CreateDeliveryFailedException;
 	
 	String trackDelivery(String userSessionId, DeliveryId deliveryId) throws TrackDeliveryFailedException;
     

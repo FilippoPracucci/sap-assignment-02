@@ -117,8 +117,8 @@ public class LobbyServiceController extends VerticleBase  {
 			String userSessionId = context.pathParam("sessionId");
 			var reply = new JsonObject();
 			try {
-				final Optional<Calendar> targetTime = DeliveryJsonConverter.getTargetTime(deliveryDetailJson);
-				if (targetTime.isPresent() && targetTime.get().toInstant().isBefore(Instant.now())) {
+				final Optional<Calendar> expectedShippingMoment = DeliveryJsonConverter.getExpectedShippingMoment(deliveryDetailJson);
+				if (expectedShippingMoment.isPresent() && expectedShippingMoment.get().toInstant().isBefore(Instant.now())) {
 					reply.put("result", "error");
 					reply.put("error", "past-target-time");
 				} else {
@@ -127,7 +127,7 @@ public class LobbyServiceController extends VerticleBase  {
 							deliveryDetailJson.getNumber("weight").doubleValue(),
 							DeliveryJsonConverter.getAddress(deliveryDetailJson, "startingPlace"),
 							DeliveryJsonConverter.getAddress(deliveryDetailJson, "destinationPlace"),
-							targetTime
+							expectedShippingMoment
 					);
 					reply.put("result", "ok");
 					reply.put("deliveryId", deliveryId.id());

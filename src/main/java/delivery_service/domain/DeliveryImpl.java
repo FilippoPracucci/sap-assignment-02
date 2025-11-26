@@ -16,12 +16,12 @@ public class DeliveryImpl implements Delivery, DroneObserver {
             final double weight,
             final Address startingPlace,
             final Address destinationPlace,
-            final Optional<Calendar> expectedShippingDate,
+            final Optional<Calendar> expectedShippingMoment,
             final DeliveryState deliveryState
     ) {
         this.id = deliveryId;
         this.deliveryDetail = new DeliveryDetailImpl(this.id, weight, startingPlace, destinationPlace,
-                expectedShippingDate.orElseGet(() ->
+                expectedShippingMoment.orElseGet(() ->
                         new Calendar.Builder().setInstant(Date.from(Instant.now())).build())
         );
         this.deliveryStatus = new DeliveryStatusImpl(this.id);
@@ -37,11 +37,11 @@ public class DeliveryImpl implements Delivery, DroneObserver {
             final double weight,
             final Address startingPlace,
             final Address destinationPlace,
-            final Optional<Calendar> expectedShippingDate
+            final Optional<Calendar> expectedShippingMoment
     ) {
         this.id = deliveryId;
         this.deliveryDetail = new DeliveryDetailImpl(this.id, weight, startingPlace, destinationPlace,
-                expectedShippingDate.orElseGet(() ->
+                expectedShippingMoment.orElseGet(() ->
                         new Calendar.Builder().setInstant(Date.from(Instant.now())).build())
         );
         this.deliveryStatus = new DeliveryStatusImpl(this.id);
@@ -98,11 +98,11 @@ public class DeliveryImpl implements Delivery, DroneObserver {
         drone.addDroneObserver(this);
         Thread.ofVirtual().start(() -> {
             try {
-                System.out.println("ExpectedShippingDate " + this.deliveryDetail.expectedShippingDate().toInstant());
-                if (this.deliveryDetail.expectedShippingDate().toInstant().isAfter(Instant.now())) {
+                System.out.println("ExpectedShippingMoment " + this.deliveryDetail.expectedShippingMoment().toInstant());
+                if (this.deliveryDetail.expectedShippingMoment().toInstant().isAfter(Instant.now())) {
                     System.out.println("Waiting " + Instant.now().until(
-                            this.deliveryDetail.expectedShippingDate().toInstant(), ChronoUnit.MILLIS) / 1000);
-                    Thread.sleep(Instant.now().until(this.deliveryDetail.expectedShippingDate().toInstant(),
+                            this.deliveryDetail.expectedShippingMoment().toInstant(), ChronoUnit.MILLIS) / 1000);
+                    Thread.sleep(Instant.now().until(this.deliveryDetail.expectedShippingMoment().toInstant(),
                             ChronoUnit.MILLIS) / 1000); // TODO change for testing
                 }
                 drone.startDrone();
