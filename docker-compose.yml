@@ -1,0 +1,41 @@
+name: shipping-on-the-air
+
+services:
+  account-service:
+    image: account-service
+    container_name: account-service-01
+    networks:
+      - shipping_on_the_air_network
+    ports:
+      - "9000:9000"
+    expose: 
+      - 9000
+  lobby-service:
+    image: lobby-service
+    container_name: lobby-service-01
+    networks:
+      - shipping_on_the_air_network
+    ports:
+      - "9001:9001"
+    expose: 
+      - 9001
+  delivery-service:
+    image: delivery-service
+    container_name: delivery-service-01
+    networks:
+      - shipping_on_the_air_network
+    ports:
+      - "9002:9002"
+    expose: 
+      - 9002
+  # api-gateway:
+  #  image: api-gateway
+  #  container_name: api-gateway-01
+  #  networks:
+  #    - shipping_on_the_air_network
+  #  ports:
+  #    - "8080:8080"
+  #  expose:
+  #    - 8080
+networks:
+  shipping_on_the_air_network:
