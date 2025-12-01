@@ -5,7 +5,7 @@ import account_service.infrastructure.AccountServiceController;
 import account_service.infrastructure.FileBasedAccountRepository;
 import delivery_service.application.DeliveryRepository;
 import delivery_service.application.DeliveryServiceImpl;
-import delivery_service.domain.Address;
+import lobby_service.domain.Address;
 import delivery_service.domain.DeliveryId;
 import delivery_service.infrastructure.DeliveryServiceController;
 import delivery_service.infrastructure.FileBasedDeliveryRepository;
