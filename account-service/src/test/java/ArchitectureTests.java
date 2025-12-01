@@ -16,11 +16,7 @@ public class ArchitectureTests {
 
 	final ClassFileImporter importer = new ClassFileImporter().withImportOption(new ImportOption.DoNotIncludeTests());
 
-	final Set<JavaClasses> importedClasses = Set.of(
-			importer.importPackages("account_service"),
-			importer.importPackages("delivery_service"),
-			importer.importPackages("lobby_service")
-	);
+	final JavaClasses importedClasses =  importer.importPackages("account_service");
 	final String domainPackage = "..domain..";
 	final String applicationPackage = "..application..";
 	final String infrastructurePackage = "..infrastructure..";
@@ -34,7 +30,7 @@ public class ArchitectureTests {
     			noClasses().that().resideInAPackage(domainPackage)
     			.should().dependOnClassesThat().resideInAPackage(applicationPackage)
     			.orShould().dependOnClassesThat().resideInAPackage(infrastructurePackage);
-    	this.importedClasses.forEach(domainModelWithNoDeps::check);
+    	domainModelWithNoDeps.check(this.importedClasses);
 
     	/* it must have a layered architecture */
     	
@@ -46,7 +42,7 @@ public class ArchitectureTests {
 				.whereLayer("Infrastructure").mayNotBeAccessedByAnyLayer()
 				.whereLayer("Application").mayOnlyBeAccessedByLayers("Infrastructure")
 				.whereLayer("Domain").mayOnlyBeAccessedByLayers("Application","Infrastructure");
-		this.importedClasses.forEach(layeredRule::check);
+		layeredRule.check(this.importedClasses);
     }	
 	
 	@Test
@@ -62,14 +58,14 @@ public class ArchitectureTests {
     			  	.areAnnotatedWith(OutBoundPort.class)
     			  	.should().resideInAPackage(applicationPackage)
     			  	.orShould().resideInAPackage(domainPackage);
-		this.importedClasses.forEach(portsRule::check);
+		portsRule.check(this.importedClasses);
   
     	/* all adapters should be defined in the infrastructure layer */
     	
     	var adaptersRule = classes().that()
     				.areAnnotatedWith(Adapter.class)
     			  	.should().resideInAPackage(infrastructurePackage);
-		this.importedClasses.forEach(adaptersRule::check);
+		adaptersRule.check(this.importedClasses);
       	
     	
     }

@@ -1,4 +1,4 @@
-package main.java.delivery_service.application;
+package delivery_service.application;
 
 import common.ddd.Repository;
 import delivery_service.application.TrackingSessionNotFoundException;

@@ -1,4 +1,4 @@
-package main.java.lobby_service.application;
+package lobby_service.application;
 
 import lobby_service.application.UserSessionNotFoundException;
 import lobby_service.domain.UserId;

@@ -1,4 +1,4 @@
-package delivery_service.domain;
+package lobby_service.domain;
 
 import common.ddd.ValueObject;
 

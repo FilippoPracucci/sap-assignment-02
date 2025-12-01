@@ -1,4 +1,4 @@
-package main.java.common.hexagonal;
+package common.hexagonal;
 
 public @interface OutBoundPort {
 

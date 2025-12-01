@@ -1,4 +1,4 @@
-package main.java.delivery_service.infrastructure;
+package delivery_service.infrastructure;
 
 import delivery_service.domain.*;
 import io.vertx.core.json.JsonObject;

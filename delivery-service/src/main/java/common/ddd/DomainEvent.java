@@ -1,6 +1,4 @@
-package main.java.common.ddd;
-
-import common.ddd.ValueObject;
+package common.ddd;
 
 public interface DomainEvent extends ValueObject {
 

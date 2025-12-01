@@ -1,10 +1,7 @@
-package main.java.lobby_service.application;
+package lobby_service.application;
 
 import common.hexagonal.OutBoundPort;
-import delivery_service.domain.Address;
-import lobby_service.application.CreateDeliveryFailedException;
-import lobby_service.application.ServiceNotAvailableException;
-import lobby_service.application.TrackDeliveryFailedException;
+import lobby_service.domain.Address;
 import lobby_service.domain.*;
 
 import java.util.Calendar;

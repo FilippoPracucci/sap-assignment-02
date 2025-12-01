@@ -1,4 +1,4 @@
-package main.java.delivery_service.infrastructure;
+package delivery_service.infrastructure;
 
 import delivery_service.application.*;
 import delivery_service.domain.*;

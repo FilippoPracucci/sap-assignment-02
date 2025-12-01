@@ -1,4 +1,4 @@
-package main.java.lobby_service.infrastructure;
+package lobby_service.infrastructure;
 
 import common.hexagonal.Adapter;
 import lobby_service.application.AccountService;

@@ -1,11 +1,9 @@
-package main.java.lobby_service.infrastructure;
+package lobby_service.infrastructure;
 
-import delivery_service.domain.*;
+import lobby_service.domain.*;
 import io.vertx.core.json.JsonObject;
 
-import java.time.Instant;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package main.java.common.ddd;
+package common.ddd;
 
 public interface Factory {
 

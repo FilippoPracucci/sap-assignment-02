@@ -1,4 +1,4 @@
-package main.java.lobby_service.domain;
+package lobby_service.domain;
 
 import common.ddd.ValueObject;
 

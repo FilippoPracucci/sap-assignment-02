@@ -1,4 +1,4 @@
-package main.java.delivery_service.domain;
+package delivery_service.domain;
 
 import common.ddd.Entity;
 import delivery_service.domain.DeliveryNotShippedYetException;

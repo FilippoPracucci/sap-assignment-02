@@ -1,4 +1,4 @@
-package main.java.delivery_service.domain;
+package delivery_service.domain;
 
 public interface DeliveryObserver {
 

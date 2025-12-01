@@ -1,4 +1,4 @@
-package main.java.lobby_service.application;
+package lobby_service.application;
 
 import common.hexagonal.OutBoundPort;
 import lobby_service.application.ServiceNotAvailableException;

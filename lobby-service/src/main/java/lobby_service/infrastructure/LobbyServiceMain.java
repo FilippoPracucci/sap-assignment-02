@@ -1,4 +1,4 @@
-package main.java.lobby_service.infrastructure;
+package lobby_service.infrastructure;
 
 import lobby_service.application.*;
 import io.vertx.core.Vertx;

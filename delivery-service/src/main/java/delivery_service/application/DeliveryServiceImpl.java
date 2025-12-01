@@ -1,6 +1,5 @@
-package main.java.delivery_service.application;
+package delivery_service.application;
 
-import delivery_service.application.*;
 import delivery_service.domain.*;
 
 import java.util.Calendar;

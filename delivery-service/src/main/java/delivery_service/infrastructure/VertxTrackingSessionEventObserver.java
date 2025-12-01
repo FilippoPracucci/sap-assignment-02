@@ -1,4 +1,4 @@
-package main.java.delivery_service.infrastructure;
+package delivery_service.infrastructure;
 
 import common.hexagonal.Adapter;
 import delivery_service.application.TrackingSessionEventObserver;
