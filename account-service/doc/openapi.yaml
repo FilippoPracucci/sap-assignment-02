@@ -1,0 +1,90 @@
+openapi: 3.0.3
+info:
+  title: "Shipping on the Air API - Account Service"
+  description: |-
+    This is the API of Shipping on the Air Account Service
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.1.4
+servers:
+  - url: https://localhost:8080/api/v1 # TODO: change localhost
+tags:
+  - name: account
+    description: User account
+
+paths:
+
+  /accounts:
+    post:
+      tags:
+        - account
+      description: Create a new account
+      operationId: createNewAccount
+      parameters:
+        - name: userName
+          in: query
+          description: user name
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: user password
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: account successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accountId:
+                    description: account id
+                    type: string
+                  loginLink:
+                    description: link to do login
+                    type: string
+                  accountLink:
+                    description: link to the account resource
+                    type: string
+
+  /accounts/{accountId}:
+    get:
+      tags:
+        - account
+      description: Get account info
+      operationId: getAccountInfo
+      parameters:
+        - name: accountId
+          in: path
+          description: ID of account to return
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+
+components:
+  schemas:
+    Account:
+      type: object
+      properties:
+        userName:
+          type: string
+          description: user name
+        password:
+          type: string
+          description: password of the user
+        whenCreated:
+          type: integer
+          description: creation date/time (in millis)
+          format: int64

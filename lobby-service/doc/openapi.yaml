@@ -1,0 +1,176 @@
+openapi: 3.0.3
+info:
+  title: "Shipping on the Air API - Lobby Service"
+  description: |-
+    This is the API of Shipping on the Air Lobby Service
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.1.4
+servers:
+  - url: https://localhost:8080/api/v1 # TODO: change localhost
+tags:
+  - name: account
+    description: User account
+  - name: user-session
+    description: Logged in user session
+
+paths:
+  /accounts/{accountId}/login:
+    post:
+      tags:
+        - account
+      description: User login
+      operationId: login
+      parameters:
+        - name: accountId
+          in: path
+          description: ID of the account to return
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: user password
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: user successfully logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    description: user session id
+                    type: string
+                  sessionLink:
+                    description: link to user session resource
+                    type: string
+                  createDeliveryLink:
+                    description: link to create a new delivery
+                    type: string
+                  trackDeliveryLink:
+                    description: link to track a delivery
+                    type: string
+                
+  /user-sessions/{sessionId}/create-delivery:
+    post:
+      tags:
+        - user-session
+      description: A logged in user creates a new delivery
+      operationId: createNewDelivery
+      parameters:
+        - name: sessionId
+          in: path
+          description: ID of the user session
+          required: true
+          schema:
+            type: string
+        - name: weight
+          in: query
+          description: weight of the package to deliver
+          required: true
+          schema:
+            type: number
+        - name: startingPlace
+          in: query
+          description: the delivery starting place
+          required: true
+          schema:
+            type: object
+            properties:
+              street:
+                description: the delivery starting place street
+                type: string
+              number:
+                description: the delivery starting place number
+                type: number
+        - name: destinationPlace
+          in: query
+          description: the delivery destination place
+          required: true
+          schema:
+            type: object
+            properties:
+              street:
+                description: the delivery destination place street
+                type: string
+              number:
+                description: the delivery destination place number
+                type: number
+        - name: expectedShippingMoment
+          in: query
+          description: the desired time to deliver the package
+          required: false
+          schema:
+            type: object
+            properties:
+              year:
+                description: the desired year to deliver the package
+                type: number
+              month:
+                description: the desired month to deliver the package
+                type: number
+              day:
+                description: the desired day to deliver the package
+                type: number
+              hours:
+                description: the desired hour to deliver the package
+                type: number
+              minutes:
+                description: the desired minute to deliver the package
+                type: number
+      responses:
+        '200':
+          description: delivery successfully created
+          content:
+            application/json:       
+              schema:
+                type: object
+                properties:
+                  deliveryId:
+                    description: delivery identifier
+                    type: string
+                  deliveryLink:
+                    description: link to the delivery resource 
+                    type: string
+                  trackDeliveryLink:
+                    description: link to track the delivery
+                    type: string
+          
+  /user-sessions/{sessionId}/track-delivery:
+    post:
+      tags:
+        - user-session
+      description: A logged in user tracks a delivery
+      operationId: trackDelivery
+      parameters:
+        - name: sessionId
+          in: path
+          description: ID of the user session
+          required: true
+          schema:
+            type: string
+        - name: deliveryId
+          in: query
+          description: unique identifier of the delivery to track
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: delivery successfully tracked
+          content:
+            application/json:       
+              schema:
+                type: object
+                properties:
+                  trackingSessionId:
+                    description: tracking session identifier
+                    type: string
+                  trackingSessionLink:
+                    description: link to the tracking session resource
+                    type: string
