@@ -34,7 +34,7 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 	@Override
 	public DeliveryStatus getDeliveryStatus(final DeliveryId deliveryId, final String trackingSessionId)
 			throws DeliveryNotFoundException, TrackingSessionNotFoundException {
-		logger.log(Level.INFO, "get delivery " + deliveryId + " status");
+		logger.log(Level.INFO, "get delivery " + deliveryId.id() + " status");
         if (!this.deliveryRepository.isPresent(deliveryId)) {
 			throw new DeliveryNotFoundException();
 		}

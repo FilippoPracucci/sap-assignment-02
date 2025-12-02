@@ -12,6 +12,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
+import lobby_service.domain.UserId;
 
 import java.time.Instant;
 import java.util.Calendar;
@@ -85,7 +86,7 @@ public class LobbyServiceController extends VerticleBase  {
 			String password = userInfo.getString("password");
 			var reply = new JsonObject();
 			try {
-				String userSessionId = lobbyService.login(userId, password);
+				String userSessionId = lobbyService.login(new UserId(userId), password);
 				reply.put("result", "ok");
 				var createPath = CREATE_DELIVERY_RESOURCE_PATH.replace(":sessionId", userSessionId);
 				var trackPath = TRACK_DELIVERY_RESOURCE_PATH.replace(":sessionId", userSessionId);

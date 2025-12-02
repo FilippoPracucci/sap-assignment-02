@@ -59,7 +59,7 @@ public class DeliveryServiceController extends VerticleBase  {
 		router.route(HttpMethod.POST, TRACK_RESOURCE_PATH).handler(this::trackDelivery);
 		router.route(HttpMethod.POST, STOP_TRACKING_RESOURCE_PATH).handler(this::stopTrackingDelivery);
 		router.route(HttpMethod.GET, TRACKING_RESOURCE_PATH).handler(this::getDeliveryStatus);
-		this.handleEventSubscription(server, "/api/events");
+		this.handleEventSubscription(server, "/api/" + API_VERSION + "/events");
 
 		/* static files */
 		router.route("/public/*").handler(StaticHandler.create());
@@ -216,7 +216,7 @@ public class DeliveryServiceController extends VerticleBase  {
 				reply.put("result", "ok");
 				final JsonObject deliveryJson = new JsonObject();
 				deliveryJson.put("deliveryId", deliveryId.id());
-				deliveryJson.put("deliveryStatus", deliveryStatus.getState().toString());
+				deliveryJson.put("deliveryState", deliveryStatus.getState().getLabel());
 				if (deliveryStatus.isTimeLeftAvailable()) {
 					deliveryJson.put("timeLeft", deliveryStatus.getTimeLeft().days() + " days left");
 				}

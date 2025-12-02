@@ -3,6 +3,7 @@ package lobby_service.application;
 import common.hexagonal.InBoundPort;
 import lobby_service.domain.Address;
 import lobby_service.domain.DeliveryId;
+import lobby_service.domain.UserId;
 
 import java.util.Calendar;
 import java.util.Optional;
@@ -15,7 +16,7 @@ import java.util.Optional;
 @InBoundPort
 public interface LobbyService {
 
-	String login(String userName, String password) throws LoginFailedException;
+	String login(UserId userId, String password) throws LoginFailedException;
 	
 	DeliveryId createNewDelivery(String userSessionId, double weight, Address startingPlace, Address destinationPlace,
 								 Optional<Calendar> expectedShippingMoment) throws CreateDeliveryFailedException;

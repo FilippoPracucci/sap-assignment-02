@@ -1,12 +1,9 @@
 package lobby_service.application;
 
 import common.hexagonal.OutBoundPort;
-import lobby_service.application.ServiceNotAvailableException;
-import lobby_service.application.UserNotFoundException;
 import lobby_service.domain.UserId;
 
 @OutBoundPort
-
 public interface AccountService {
 	
 	/**

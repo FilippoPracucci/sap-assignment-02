@@ -21,14 +21,13 @@ public class LobbyServiceImpl implements LobbyService {
     private DeliveryService deliveryService;
     
     @Override
-	public String login(final String userId, final String password) throws LoginFailedException {
-		logger.log(Level.INFO, "Login: " + userId + " " + password);
+	public String login(final UserId userId, final String password) throws LoginFailedException {
+		logger.log(Level.INFO, "Login: " + userId.id() + " " + password);
 		try {
-			final UserId id = new UserId(userId);
-			if (!this.accountService.isValidPassword(id, password)) {
+			if (!this.accountService.isValidPassword(userId, password)) {
 				throw new LoginFailedException("Wrong password");
 			}
-			return this.userSessionRepository.createSession(id);
+			return this.userSessionRepository.createSession(userId);
 		} catch (final UserNotFoundException ex) {
 			throw new LoginFailedException("Username does not exist");
 		} catch (final ServiceNotAvailableException ex) {
