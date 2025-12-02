@@ -14,21 +14,21 @@ public class APIGatewayMain {
 
     /* addresses to be used when using a manual deployment */
 
-    static final String ACCOUNT_SERVICE_ADDRESS = "http://localhost:9000";
+    /*static final String ACCOUNT_SERVICE_ADDRESS = "http://localhost:9000";
     static final String LOBBY_SERVICE_ADDRESS = "http://localhost:9001";
     static final String DELIVERY_SERVICE_ADDRESS = "http://localhost:9002";
 
     static final String DELIVERY_SERVICE_WS_ADDRESS = "localhost";
-    static final int DELIVERY_SERVICE_WS_PORT = 9002;
+    static final int DELIVERY_SERVICE_WS_PORT = 9002;*/
 
     /* addresses to be used when deploying with Docker */
 
-    /*static final String ACCOUNT_SERVICE_ADDRESS = "http://account-service:9000";
+    static final String ACCOUNT_SERVICE_ADDRESS = "http://account-service:9000";
     static final String LOBBY_SERVICE_ADDRESS = "http://lobby-service:9001";
     static final String DELIVERY_SERVICE_ADDRESS = "http://delivery-service:9002";
 
     static final String DELIVERY_SERVICE_WS_ADDRESS = "delivery-service";
-    static final int DELIVERY_SERVICE_WS_PORT = 9002;*/
+    static final int DELIVERY_SERVICE_WS_PORT = 9002;
 
     public static void main(String[] args) {
 

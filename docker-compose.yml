@@ -26,16 +26,16 @@ services:
       - shipping_on_the_air_network
     ports:
       - "9002:9002"
-    expose: 
+    expose:
       - 9002
-  # api-gateway:
-  #  image: api-gateway
-  #  container_name: api-gateway-01
-  #  networks:
-  #    - shipping_on_the_air_network
-  #  ports:
-  #    - "8080:8080"
-  #  expose:
-  #    - 8080
+  api-gateway:
+    image: api-gateway
+    container_name: api-gateway-01
+    networks:
+      - shipping_on_the_air_network
+    ports:
+      - "8080:8080"
+    expose:
+      - 8080
 networks:
   shipping_on_the_air_network:
