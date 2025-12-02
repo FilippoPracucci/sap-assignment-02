@@ -120,9 +120,9 @@ components:
         deliveryId:
           type: string
           description: delivery identifier (unique)
-        status:
+        state:
           type: string
-          description: delivery status
+          description: delivery state
           items:
             type: string
             enum:
