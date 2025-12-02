@@ -29,7 +29,7 @@ public class FileBasedAccountRepository implements AccountRepository {
 	private static final String USER_PREFIX = "user-";
 
 	/* db file */
-	static final String DB_ACCOUNTS = "accounts.json";
+	static final String DB_ACCOUNTS_PATH = "./account-service/accounts.json";
 	
 	private final HashMap<UserId, Account> userAccounts;
 	
@@ -77,7 +77,7 @@ public class FileBasedAccountRepository implements AccountRepository {
 
 	private void initFromDB() {
 		try {
-			var accountsDB = new BufferedReader(new FileReader(DB_ACCOUNTS));
+			var accountsDB = new BufferedReader(new FileReader(DB_ACCOUNTS_PATH));
 			var sb = new StringBuilder();
 			while (accountsDB.ready()) {
 				sb.append(accountsDB.readLine()).append("\n");
@@ -107,7 +107,7 @@ public class FileBasedAccountRepository implements AccountRepository {
 				obj.put("whenCreated", ac.getWhenCreated());
 				list.add(obj);
 			}
-			var usersDB = new FileWriter(DB_ACCOUNTS);
+			var usersDB = new FileWriter(DB_ACCOUNTS_PATH);
 			usersDB.append(list.encodePrettily());
 			usersDB.flush();
 			usersDB.close();

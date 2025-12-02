@@ -7,7 +7,6 @@ import delivery_service.application.DeliveryRepository;
 import delivery_service.application.InvalidDeliveryIdException;
 import delivery_service.domain.*;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -27,7 +26,7 @@ public class FileBasedDeliveryRepository implements DeliveryRepository {
 	private static final String DELIVERY_PREFIX = "delivery-";
 
 	/* db file */
-	static final String DB_DELIVERIES = "deliveries.json";
+	static final String DB_DELIVERIES_PATH = "./delivery-service/deliveries.json";
 
 	private final HashMap<DeliveryId, Delivery> deliveries;
 
@@ -87,7 +86,7 @@ public class FileBasedDeliveryRepository implements DeliveryRepository {
 
 	private void initFromDB() {
 		try {
-			var deliveriesDB = new BufferedReader(new FileReader(DB_DELIVERIES));
+			var deliveriesDB = new BufferedReader(new FileReader(DB_DELIVERIES_PATH));
 			var sb = new StringBuilder();
 			while (deliveriesDB.ready()) {
 				sb.append(deliveriesDB.readLine()).append("\n");
@@ -113,7 +112,7 @@ public class FileBasedDeliveryRepository implements DeliveryRepository {
 						Optional.of(delivery.getDeliveryStatus().getState())
 				));
 			}
-			var usersDB = new FileWriter(DB_DELIVERIES);
+			var usersDB = new FileWriter(DB_DELIVERIES_PATH);
 			usersDB.append(list.encodePrettily());
 			usersDB.flush();
 			usersDB.close();
