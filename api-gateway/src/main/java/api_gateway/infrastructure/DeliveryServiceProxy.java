@@ -59,7 +59,8 @@ public class DeliveryServiceProxy extends HTTPSyncBaseProxy implements DeliveryS
             if (response.statusCode() == 200) {
                 final JsonObject responseBody = new JsonObject(response.body());
                 if (responseBody.getString("result").equals("error")) {
-                    if (responseBody.getString("error").equals("tracking-session-not-present")) {
+                    if (responseBody.getString("error") != null
+                            && responseBody.getString("error").equals("tracking-session-not-present")) {
                         throw new TrackingSessionNotFoundException();
                     }
                     throw new DeliveryNotFoundException();
@@ -91,7 +92,8 @@ public class DeliveryServiceProxy extends HTTPSyncBaseProxy implements DeliveryS
             if (response.statusCode() == 200) {
                 final JsonObject responseBody = new JsonObject(response.body());
                 if (responseBody.getString("result").equals("error")) {
-                    if (responseBody.getString("error").equals("Delivery does not exist")) {
+                    if (responseBody.getString("error") != null
+                            && responseBody.getString("error").equals("Delivery does not exist")) {
                         throw new DeliveryNotFoundException();
                     }
                     throw new TrackingSessionNotFoundException();

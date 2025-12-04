@@ -2,7 +2,6 @@ package delivery_service.infrastructure;
 
 import delivery_service.application.*;
 import delivery_service.domain.*;
-import delivery_service.infrastructure.VertxTrackingSessionEventObserver;
 import io.vertx.core.Future;
 import io.vertx.core.VerticleBase;
 import io.vertx.core.eventbus.EventBus;
@@ -17,8 +16,6 @@ import io.vertx.ext.web.handler.StaticHandler;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;

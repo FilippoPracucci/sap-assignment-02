@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 /**
  * 
- * Games Repository
+ * Deliveries Repository
  * 
  */
 @Adapter
@@ -112,10 +112,10 @@ public class FileBasedDeliveryRepository implements DeliveryRepository {
 						Optional.of(delivery.getDeliveryStatus().getState())
 				));
 			}
-			var usersDB = new FileWriter(DB_DELIVERIES_PATH);
-			usersDB.append(list.encodePrettily());
-			usersDB.flush();
-			usersDB.close();
+			var deliveriesDB = new FileWriter(DB_DELIVERIES_PATH);
+			deliveriesDB.append(list.encodePrettily());
+			deliveriesDB.flush();
+			deliveriesDB.close();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
