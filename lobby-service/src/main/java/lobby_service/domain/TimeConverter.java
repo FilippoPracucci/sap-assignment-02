@@ -1,18 +1,24 @@
 package lobby_service.domain;
 
-import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class TimeConverter {
 
     public static Calendar getNowAsCalendar() {
-        return new Calendar.Builder().setInstant(Date.from(getNowAsInstant())).build();
+        return GregorianCalendar.from(getNowAsZonedDateTime());
     }
 
-    public static Instant getNowAsInstant() {
-        return ZonedDateTime.now(ZoneId.systemDefault()).toInstant();
+    public static ZonedDateTime getNowAsZonedDateTime() {
+        return ZonedDateTime.now(ZoneId.systemDefault());
+    }
+
+    public static ZonedDateTime getZonedDateTime(final Calendar calendar) {
+        return ZonedDateTime.ofInstant(
+                calendar.toInstant(),
+                calendar.getTimeZone().toZoneId()
+        );
     }
 }

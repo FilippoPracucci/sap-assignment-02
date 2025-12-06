@@ -3,6 +3,8 @@ package api_gateway.infrastructure;
 import io.vertx.core.Vertx;
 import api_gateway.application.*;
 
+import java.util.logging.Logger;
+
 /**
  *
  * API Gateway for the Shipping in the Air case study
@@ -30,14 +32,20 @@ public class APIGatewayMain {
     static final String DELIVERY_SERVICE_WS_ADDRESS = "delivery-service";
     static final int DELIVERY_SERVICE_WS_PORT = 9002;
 
-    public static void main(String[] args) {
+    static final int METRICS_SERVER_EXPOSED_PORT = 9401;
 
+    public static void main(String[] args) {
         final AccountService accountService = new AccountServiceProxy(ACCOUNT_SERVICE_ADDRESS);
         final LobbyService lobbyService = new LobbyServiceProxy(LOBBY_SERVICE_ADDRESS);
         final DeliveryService deliveryService = new DeliveryServiceProxy(DELIVERY_SERVICE_ADDRESS,
                 DELIVERY_SERVICE_WS_ADDRESS, DELIVERY_SERVICE_WS_PORT);
 
         var server = new APIGatewayController(accountService, lobbyService, deliveryService, BACKEND_PORT);
+        try {
+            server.addControllerObserver(new PrometheusControllerObserver(METRICS_SERVER_EXPOSED_PORT));
+        } catch (final ObservabilityMetricServerException e) {
+            Logger.getLogger("[APIGatewayMain]").info("Observability metric server failed to start");
+        }
         Vertx.vertx().deployVerticle(server);
     }
 }

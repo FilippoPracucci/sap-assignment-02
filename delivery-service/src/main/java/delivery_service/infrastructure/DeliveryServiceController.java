@@ -13,6 +13,8 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Optional;
@@ -79,18 +81,18 @@ public class DeliveryServiceController extends VerticleBase  {
 		logger.info("CreateNewDelivery request - " + context.currentRoute().getPath());
 		context.request().handler(buf -> {
 			final JsonObject deliveryDetailJson = buf.toJsonObject();
-			logger.info("Payload: " + deliveryDetailJson);
 			var reply = new JsonObject();
 			try {
 				final Optional<Calendar> expectedShippingMoment =
 						DeliveryJsonConverter.getExpectedShippingMoment(deliveryDetailJson);
-				if (expectedShippingMoment.isPresent() && expectedShippingMoment.get().toInstant()
-						.isBefore(TimeConverter.getNowAsInstant())) {
+				if (expectedShippingMoment.isPresent() && TimeConverter.getZonedDateTime(expectedShippingMoment.get())
+						.isBefore(TimeConverter.getNowAsZonedDateTime())
+				) {
 					reply.put("result", "error");
 					reply.put("error", "past-shipping-moment");
-				} if (expectedShippingMoment.isPresent()
-						&& expectedShippingMoment.get().toInstant().isAfter(
-								TimeConverter.getNowAsInstant().plus(14, ChronoUnit.DAYS))
+				} else if (expectedShippingMoment.isPresent()
+						&& TimeConverter.getZonedDateTime(expectedShippingMoment.get()).isAfter(
+                                        TimeConverter.getNowAsZonedDateTime().plusDays(14))
 				) {
 					reply.put("result", "error");
 					reply.put("error", "shipping-moment-too-far");

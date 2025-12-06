@@ -93,10 +93,12 @@ public class DeliveryImpl implements Delivery, DroneObserver {
         drone.addDroneObserver(this);
         Thread.ofVirtual().start(() -> {
             try {
-                if (this.deliveryDetail.expectedShippingMoment().toInstant().isAfter(TimeConverter.getNowAsInstant())) {
-                    Thread.sleep(TimeConverter.getNowAsInstant().until(
-                            this.deliveryDetail.expectedShippingMoment().toInstant(), ChronoUnit.MILLIS)
-                    );
+                if (TimeConverter.getZonedDateTime(this.deliveryDetail.expectedShippingMoment())
+                        .isAfter(TimeConverter.getNowAsZonedDateTime())) {
+                    Thread.sleep(TimeConverter.getNowAsZonedDateTime().until(
+                            TimeConverter.getZonedDateTime(this.deliveryDetail.expectedShippingMoment()),
+                            ChronoUnit.MILLIS
+                    ));
                 }
                 drone.startDrone();
             } catch (final InterruptedException e) {

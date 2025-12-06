@@ -34,8 +34,10 @@ services:
       - shipping_on_the_air_network
     ports:
       - "9002:9002"
+      - "9400:9400"
     expose:
       - 9002
+      - 9400
     restart: always
   api-gateway:
     build:
@@ -46,8 +48,10 @@ services:
       - shipping_on_the_air_network
     ports:
       - "8080:8080"
+      - "9401:9401"
     expose:
       - 8080
+      - 9401
     healthcheck:
       test: curl --fail http://api-gateway:8080/api/v1/health || exit 1
       interval: 1m30s
@@ -63,5 +67,16 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+    networks:
+      - shipping_on_the_air_network
+    ports:
+      - "9090:9090"
+    expose:
+      - 9090
+    restart: always
 networks:
   shipping_on_the_air_network:

@@ -1,6 +1,8 @@
 package api_gateway.infrastructure;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,6 +56,9 @@ public class APIGatewayController extends VerticleBase  {
 	private final LobbyService lobbyService;
 	private final DeliveryService deliveryService;
 
+	/* observability */
+	private final List<ControllerObserver> observers;
+
 	public APIGatewayController(final AccountService accountService, final LobbyService lobbyService,
 								final DeliveryService deliveryService, final int port) {
 		this.port = port;
@@ -61,6 +66,11 @@ public class APIGatewayController extends VerticleBase  {
 		this.accountService = accountService;
 		this.lobbyService = lobbyService;
 		this.deliveryService = deliveryService;
+		this.observers = new ArrayList<>();
+	}
+
+	public void addControllerObserver(final ControllerObserver observer) {
+		observers.add(observer);
 	}
 
 	public Future<?> start() {
@@ -113,6 +123,7 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void createNewAccount(final RoutingContext context) {
 		logger.log(Level.INFO, "create a new account");
+		this.notifyNewRESTRequest();
 		context.request().handler(buf -> {
 			JsonObject userInfo = buf.toJsonObject();
 			logger.log(Level.INFO, "Payload: " + userInfo);
@@ -148,6 +159,7 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void getAccountInfo(final RoutingContext context) {
 		logger.log(Level.INFO, "get account info");
+		this.notifyNewRESTRequest();
 		var userId = context.pathParam("accountId");
 		var reply = new JsonObject();
 		this.vertx.executeBlocking(() -> this.accountService.getAccountInfo(new UserId(userId))).onSuccess((account) -> {
@@ -175,6 +187,7 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void login(final RoutingContext context) {
 		logger.log(Level.INFO, "Login request");
+		this.notifyNewRESTRequest();
 		context.request().handler(buf -> {
 			JsonObject userInfo = buf.toJsonObject();
 			logger.log(Level.INFO, "Payload: " + userInfo);
@@ -208,6 +221,7 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void createNewDelivery(final RoutingContext context) {
 		logger.log(Level.INFO, "Create delivery request - " + context.currentRoute().getPath());
+		this.notifyNewRESTRequest();
 		context.request().handler(buf -> {
 			final JsonObject deliveryDetailJson = buf.toJsonObject();
 			String userSessionId = context.pathParam("sessionId");
@@ -242,6 +256,7 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void trackDelivery(final RoutingContext context) {
 		logger.log(Level.INFO, "Track delivery request - " + context.currentRoute().getPath());
+		this.notifyNewRESTRequest();
 		context.request().handler(buf -> {
 			final String userSessionId = context.pathParam("sessionId");
 			final String deliveryId = buf.toJsonObject().getString("deliveryId");
@@ -268,6 +283,7 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void getDeliveryDetail(final RoutingContext context) {
 		logger.log(Level.INFO, "get delivery detail");
+		this.notifyNewRESTRequest();
 		context.request().endHandler(h -> {
 			final DeliveryId deliveryId = new DeliveryId(context.pathParam("deliveryId"));
 			var reply = new JsonObject();
@@ -292,6 +308,7 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void getDeliveryStatus(final RoutingContext context) {
 		logger.log(Level.INFO, "GetDeliveryStatus request - " + context.currentRoute().getPath());
+		this.notifyNewRESTRequest();
 		context.request().endHandler(h -> {
 			final JsonObject reply = new JsonObject();
 			final DeliveryId deliveryId = new DeliveryId(context.pathParam("deliveryId"));
@@ -329,6 +346,7 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void stopTrackingDelivery(final RoutingContext context) {
 		logger.log(Level.INFO, "Stop tracking delivery request - " + context.currentRoute().getPath());
+		this.notifyNewRESTRequest();
 		context.request().endHandler(h -> {
 			final DeliveryId deliveryId = new DeliveryId(context.pathParam("deliveryId"));
 			final String trackingSessionId = context.pathParam("trackingSessionId");
@@ -390,6 +408,10 @@ public class APIGatewayController extends VerticleBase  {
 		});
 	}
 
+	private void notifyNewRESTRequest() {
+		this.observers.forEach(ControllerObserver::notifyNewRESTRequest);
+	}
+
 	
 	/* Aux methods */
 
@@ -403,5 +425,4 @@ public class APIGatewayController extends VerticleBase  {
 		response.putHeader("content-type", "application/json");
 		response.end();
 	}
-
 }

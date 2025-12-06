@@ -15,10 +15,8 @@ import io.vertx.ext.web.handler.StaticHandler;
 import lobby_service.domain.TimeConverter;
 import lobby_service.domain.UserId;
 
-import java.time.Instant;
 import java.util.Calendar;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -120,8 +118,8 @@ public class LobbyServiceController extends VerticleBase  {
 			try {
 				final Optional<Calendar> expectedShippingMoment =
 						DeliveryJsonConverter.getExpectedShippingMoment(deliveryDetailJson);
-				if (expectedShippingMoment.isPresent() && expectedShippingMoment.get().toInstant()
-						.isBefore(TimeConverter.getNowAsInstant())) {
+				if (expectedShippingMoment.isPresent() && TimeConverter.getZonedDateTime(expectedShippingMoment.get())
+						.isBefore(TimeConverter.getNowAsZonedDateTime())) {
 					reply.put("result", "error");
 					reply.put("error", "past-shipping-moment");
 				} else {

@@ -1,8 +1,6 @@
 package delivery_service.infrastructure;
 
 import delivery_service.application.DeliveryServiceImpl;
-import delivery_service.infrastructure.DeliveryServiceController;
-import delivery_service.infrastructure.FileBasedDeliveryRepository;
 import io.vertx.core.Vertx;
 
 /**
