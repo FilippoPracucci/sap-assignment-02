@@ -5,7 +5,6 @@ import lobby_service.domain.*;
 
 import java.util.Calendar;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -22,7 +21,7 @@ public class LobbyServiceImpl implements LobbyService {
     
     @Override
 	public String login(final UserId userId, final String password) throws LoginFailedException {
-		logger.log(Level.INFO, "Login: " + userId.id() + " " + password);
+		logger.info("Login: " + userId.id() + " " + password);
 		try {
 			if (!this.accountService.isValidPassword(userId, password)) {
 				throw new LoginFailedException("Wrong password");
@@ -43,7 +42,7 @@ public class LobbyServiceImpl implements LobbyService {
 			if (this.userSessionRepository.isPresent(userSessionId)) {
 				final DeliveryId deliveryId = this.deliveryService.createNewDelivery(weight, startingPlace,
 						destinationPlace, expectedShippingMoment);
-				logger.log(Level.INFO, "create new delivery " + deliveryId.id() + " by " + userSessionId);
+				logger.info("create new delivery " + deliveryId.id() + " by " + userSessionId);
 				return deliveryId;
 			} else {
 				throw new CreateDeliveryFailedException("User is not logged in");
@@ -55,7 +54,7 @@ public class LobbyServiceImpl implements LobbyService {
 
 	@Override
 	public String trackDelivery(final String userSessionId, final DeliveryId deliveryId) throws TrackDeliveryFailedException {
-		logger.log(Level.INFO, "Track delivery " + userSessionId + " " + deliveryId);
+		logger.info("Track delivery " + userSessionId + " " + deliveryId);
 		try {
 			if (this.userSessionRepository.isPresent(userSessionId)) {
 				return this.deliveryService.trackDelivery(deliveryId);

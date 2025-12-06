@@ -4,7 +4,6 @@ import account_service.domain.Account;
 import account_service.domain.AccountImpl;
 import account_service.domain.UserId;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AccountServiceImpl implements AccountService {
@@ -14,7 +13,7 @@ public class AccountServiceImpl implements AccountService {
     
     @Override
 	public Account registerUser(final String userName, final String password) {
-		logger.log(Level.INFO, "Register User: " + userName + " " + password);
+		logger.info("Register User: " + userName + " " + password);
 		var account = new AccountImpl(this.accountRepository.getNextId(), userName, password);
         try {
             this.accountRepository.addAccount(account);
@@ -26,7 +25,7 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public Account getAccountInfo(final String userId) throws AccountNotFoundException {
-		logger.log(Level.INFO, "Get account info: " + userId);
+		logger.info("Get account info: " + userId);
 		if (!this.accountRepository.isPresent(new UserId(userId))) {
 			throw new AccountNotFoundException();
 		}
@@ -36,7 +35,7 @@ public class AccountServiceImpl implements AccountService {
 		
 	@Override
 	public boolean isValidPassword(final String userId, final String password) throws AccountNotFoundException {
-		logger.log(Level.INFO, "IsValid password " + userId + " - " + password);
+		logger.info("IsValid password " + userId + " - " + password);
 		if (!this.accountRepository.isPresent(new UserId(userId))) {
 			throw new AccountNotFoundException();
 		}

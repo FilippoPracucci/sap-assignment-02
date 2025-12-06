@@ -18,6 +18,7 @@ import lobby_service.application.CreateDeliveryFailedException;
 import lobby_service.application.LobbyServiceImpl;
 import lobby_service.application.LoginFailedException;
 import lobby_service.application.TrackDeliveryFailedException;
+import lobby_service.domain.UserId;
 import lobby_service.infrastructure.AccountServiceProxy;
 import lobby_service.infrastructure.DeliveryServiceProxy;
 import org.junit.jupiter.api.Assertions;
@@ -55,7 +56,7 @@ public class TrackDeliverySteps {
 
     private void createStubDelivery() {
         try {
-            this.userSessionId = this.lobbyService.login("user-1", "Secret#123");
+            this.userSessionId = this.lobbyService.login(new UserId("user-1"), "Secret#123");
             this.deliveryId = this.lobbyService.createNewDelivery(
                     this.userSessionId,
                     2.0,

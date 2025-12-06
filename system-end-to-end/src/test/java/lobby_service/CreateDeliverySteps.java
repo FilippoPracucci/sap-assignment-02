@@ -5,6 +5,7 @@ import account_service.infrastructure.AccountServiceController;
 import account_service.infrastructure.FileBasedAccountRepository;
 import delivery_service.application.DeliveryRepository;
 import delivery_service.application.DeliveryServiceImpl;
+import delivery_service.domain.TimeConverter;
 import lobby_service.domain.Address;
 import delivery_service.domain.DeliveryId;
 import delivery_service.infrastructure.DeliveryServiceController;
@@ -17,6 +18,7 @@ import io.vertx.core.Vertx;
 import lobby_service.application.CreateDeliveryFailedException;
 import lobby_service.application.LobbyServiceImpl;
 import lobby_service.application.LoginFailedException;
+import lobby_service.domain.UserId;
 import lobby_service.infrastructure.AccountServiceProxy;
 import lobby_service.infrastructure.DeliveryServiceProxy;
 
@@ -62,7 +64,7 @@ public class CreateDeliverySteps {
     @And("I am logged in as {string} with password {string}")
     public void iAmLoggedInAsWithPassword(final String userId, final String pwd) {
         try {
-            this.userSessionId = this.lobbyService.login(userId, pwd);
+            this.userSessionId = this.lobbyService.login(new UserId(userId), pwd);
         } catch (final LoginFailedException e) {
             throw new RuntimeException(e);
         }
@@ -114,7 +116,9 @@ public class CreateDeliverySteps {
             final String expectedShippingMoment) {
         this.createDelivery(weight, startingPlace, destinationPlace,
                 Optional.of(new Calendar.Builder().setInstant(
-                        Date.from(Instant.now().plus(Integer.parseInt(expectedShippingMoment), ChronoUnit.DAYS))).build()
+                        Date.from(TimeConverter.getNowAsInstant().plus(
+                                Integer.parseInt(expectedShippingMoment), ChronoUnit.DAYS))
+                        ).build()
                 )
         );
     }

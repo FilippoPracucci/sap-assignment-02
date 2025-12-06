@@ -13,7 +13,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -37,12 +36,11 @@ public class AccountServiceController extends VerticleBase {
 
 	public AccountServiceController(final AccountService service, final int port) {
 		this.port = port;
-		logger.setLevel(Level.INFO);
 		this.accountService = service;
 	}
 
 	public Future<?> start() {
-		logger.log(Level.INFO, "Account Service initializing...");
+		logger.info("Account Service initializing...");
 		HttpServer server = vertx.createHttpServer();
 
 		Router router = Router.router(vertx);
@@ -59,7 +57,7 @@ public class AccountServiceController extends VerticleBase {
 		var fut = server.requestHandler(router).listen(this.port);
 
 		fut.onSuccess(res -> {
-			logger.log(Level.INFO, "Account Service ready - port: " + this.port);
+			logger.info("Account Service ready - port: " + this.port);
 		});
 
 		return fut;
@@ -74,10 +72,10 @@ public class AccountServiceController extends VerticleBase {
 	 * @param context
 	 */
 	protected void createAccount(final RoutingContext context) {
-		logger.log(Level.INFO, "create a new account");
+		logger.info("create a new account");
 		context.request().handler(buf -> {
 			JsonObject userInfo = buf.toJsonObject();
-			logger.log(Level.INFO, "Payload: " + userInfo);
+			logger.info("Payload: " + userInfo);
 			var userName = userInfo.getString("userName");
 			var password = userInfo.getString("password");
 			var reply = new JsonObject();
@@ -101,7 +99,7 @@ public class AccountServiceController extends VerticleBase {
 	 * @param context
 	 */
 	protected void getAccountInfo(final RoutingContext context) {
-		logger.log(Level.INFO, "get account info");
+		logger.info("get account info");
 		var userId = context.pathParam("accountId");
 		var reply = new JsonObject();
 		try {
@@ -129,7 +127,7 @@ public class AccountServiceController extends VerticleBase {
 	 * @param context
 	 */
 	protected void checkAccountPassword(final RoutingContext context) {
-		logger.log(Level.INFO, "check account password");
+		logger.info("check account password");
 		context.request().handler(buf -> {
 			var userId = context.pathParam("accountId");
 			JsonObject userInfo = buf.toJsonObject();

@@ -13,11 +13,9 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
 
-import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -42,12 +40,11 @@ public class DeliveryServiceController extends VerticleBase  {
 	
 	public DeliveryServiceController(final DeliveryService deliveryService, final int port) {
 		this.port = port;
-		logger.setLevel(Level.INFO);
 		this.deliveryService = deliveryService;
 	}
 
 	public Future<?> start() {
-		logger.log(Level.INFO, "Delivery Service initializing...");
+		logger.info("Delivery Service initializing...");
 		HttpServer server = vertx.createHttpServer();
 				
 		Router router = Router.router(vertx);
@@ -66,7 +63,7 @@ public class DeliveryServiceController extends VerticleBase  {
 			.requestHandler(router)
 			.listen(this.port);
 		fut.onSuccess(res -> {
-			logger.log(Level.INFO, "Delivery Service ready - port: " + this.port);
+			logger.info("Delivery Service ready - port: " + this.port);
 		});
 
 		return fut;
@@ -79,10 +76,10 @@ public class DeliveryServiceController extends VerticleBase  {
 	 * @param context
 	 */
 	protected void createNewDelivery(final RoutingContext context) {
-		logger.log(Level.INFO, "CreateNewDelivery request - " + context.currentRoute().getPath());
+		logger.info("CreateNewDelivery request - " + context.currentRoute().getPath());
 		context.request().handler(buf -> {
 			final JsonObject deliveryDetailJson = buf.toJsonObject();
-			logger.log(Level.INFO, "Payload: " + deliveryDetailJson);
+			logger.info("Payload: " + deliveryDetailJson);
 			var reply = new JsonObject();
 			try {
 				final Optional<Calendar> expectedShippingMoment =
@@ -90,13 +87,13 @@ public class DeliveryServiceController extends VerticleBase  {
 				if (expectedShippingMoment.isPresent() && expectedShippingMoment.get().toInstant()
 						.isBefore(TimeConverter.getNowAsInstant())) {
 					reply.put("result", "error");
-					reply.put("error", "past-target-time");
+					reply.put("error", "past-shipping-moment");
 				} if (expectedShippingMoment.isPresent()
 						&& expectedShippingMoment.get().toInstant().isAfter(
 								TimeConverter.getNowAsInstant().plus(14, ChronoUnit.DAYS))
 				) {
 					reply.put("result", "error");
-					reply.put("error", "target-time-too-far");
+					reply.put("error", "shipping-moment-too-far");
 				} else {
 					final DeliveryId deliveryId = this.deliveryService.createNewDelivery(
 							deliveryDetailJson.getNumber("weight").doubleValue(),
@@ -111,7 +108,7 @@ public class DeliveryServiceController extends VerticleBase  {
 				}
 				sendReply(context.response(), reply);
 			} catch (final Exception ex) {
-				logger.log(Level.SEVERE, ex.getMessage());
+				logger.severe(ex.getMessage());
 				sendError(context.response());
 			}
 		});		
@@ -124,7 +121,7 @@ public class DeliveryServiceController extends VerticleBase  {
 	 * @param context
 	 */
 	protected void getDeliveryDetail(final RoutingContext context) {
-		logger.log(Level.INFO, "get delivery detail");
+		logger.info("get delivery detail");
 		context.request().endHandler(h -> {
 			final DeliveryId deliveryId = new DeliveryId(context.pathParam("deliveryId"));
 			var reply = new JsonObject();
@@ -157,10 +154,10 @@ public class DeliveryServiceController extends VerticleBase  {
 	 * @param context
 	 */
 	protected void trackDelivery(final RoutingContext context) {
-		logger.log(Level.INFO, "TrackDelivery request - " + context.currentRoute().getPath());
+		logger.info("TrackDelivery request - " + context.currentRoute().getPath());
 		context.request().endHandler(h -> {
 			final DeliveryId deliveryId = new DeliveryId(context.pathParam("deliveryId"));
-			logger.log(Level.INFO, "Track delivery " + deliveryId.id());
+			logger.info("Track delivery " + deliveryId.id());
 			var reply = new JsonObject();
 			try {
 				final TrackingSession trackingSession = this.deliveryService.trackDelivery(deliveryId,
@@ -179,11 +176,11 @@ public class DeliveryServiceController extends VerticleBase  {
 	}
 
 	protected void stopTrackingDelivery(final RoutingContext context) {
-		logger.log(Level.INFO, "Stop tracking delivery request - " + context.currentRoute().getPath());
+		logger.info("Stop tracking delivery request - " + context.currentRoute().getPath());
 		context.request().endHandler(h -> {
 			final DeliveryId deliveryId = new DeliveryId(context.pathParam("deliveryId"));
 			final String trackingSessionId = context.pathParam("trackingSessionId");
-			logger.log(Level.INFO, "Stop tracking delivery " + deliveryId.id());
+			logger.info("Stop tracking delivery " + deliveryId.id());
 			var reply = new JsonObject();
 			try {
 				this.deliveryService.stopTrackingDelivery(deliveryId, trackingSessionId);
@@ -206,7 +203,7 @@ public class DeliveryServiceController extends VerticleBase  {
 	 * @param context
 	 */
 	protected void getDeliveryStatus(final RoutingContext context) {
-		logger.log(Level.INFO, "GetDeliveryStatus request - " + context.currentRoute().getPath());
+		logger.info("GetDeliveryStatus request - " + context.currentRoute().getPath());
 		context.request().endHandler(h -> {
 			final JsonObject reply = new JsonObject();
 			final DeliveryId deliveryId = new DeliveryId(context.pathParam("deliveryId"));
@@ -244,7 +241,7 @@ public class DeliveryServiceController extends VerticleBase  {
 	protected void handleEventSubscription(final HttpServer server, final String path) {
 		server.webSocketHandler(webSocket -> {
 			if (webSocket.path().equals(path)) {
-				logger.log(Level.INFO, "New subscription accepted.");
+				logger.info("New subscription accepted.");
 
 				/*
 				 *
@@ -253,7 +250,7 @@ public class DeliveryServiceController extends VerticleBase  {
 				 *
 				 */
 				webSocket.textMessageHandler(openMsg -> {
-					logger.log(Level.INFO, "For delivery: " + openMsg);
+					logger.info("For delivery: " + openMsg);
 					JsonObject obj = new JsonObject(openMsg);
 					final String trackingSessionId = obj.getString("trackingSessionId");
 
@@ -268,7 +265,7 @@ public class DeliveryServiceController extends VerticleBase  {
 
 					eventBus.consumer(trackingSessionId, msg -> {
 						final JsonObject event = (JsonObject) msg.body();
-						logger.log(Level.INFO, "Event: " + event.encodePrettily());
+						logger.info("Event: " + event.encodePrettily());
 						webSocket.writeTextMessage(event.encodePrettily());
 					});
 

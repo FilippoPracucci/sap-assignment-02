@@ -112,7 +112,7 @@ public class FileBasedAccountRepository implements AccountRepository {
 			usersDB.flush();
 			usersDB.close();
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			logger.severe(ex.getMessage());
 		}	
 	}
 	

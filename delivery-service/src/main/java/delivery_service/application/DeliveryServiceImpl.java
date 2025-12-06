@@ -4,7 +4,6 @@ import delivery_service.domain.*;
 
 import java.util.Calendar;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -24,7 +23,7 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 
 	@Override
 	public DeliveryDetail getDeliveryDetail(final DeliveryId deliveryId) throws DeliveryNotFoundException {
-		logger.log(Level.INFO, "get delivery " + deliveryId + " detail");
+		logger.info("get delivery " + deliveryId + " detail");
 		if (!this.deliveryRepository.isPresent(deliveryId)) {
 			throw new DeliveryNotFoundException();
 		}
@@ -34,7 +33,7 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 	@Override
 	public DeliveryStatus getDeliveryStatus(final DeliveryId deliveryId, final String trackingSessionId)
 			throws DeliveryNotFoundException, TrackingSessionNotFoundException {
-		logger.log(Level.INFO, "get delivery " + deliveryId.id() + " status");
+		logger.info("get delivery " + deliveryId.id() + " status");
         if (!this.deliveryRepository.isPresent(deliveryId)) {
 			throw new DeliveryNotFoundException();
 		}
@@ -55,7 +54,7 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 		final Delivery delivery = new DeliveryImpl(this.deliveryRepository.getNextId(), weight, startingPlace,
 				destinationPlace, expectedShippingMoment);
 		delivery.addDeliveryObserver(this);
-		logger.log(Level.INFO, "create New Delivery " + delivery.getId().id());
+		logger.info("create New Delivery " + delivery.getId().id());
         try {
             this.deliveryRepository.addDelivery(delivery);
         } catch (InvalidDeliveryIdException | DeliveryAlreadyPresentException e) {
@@ -67,7 +66,7 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 	@Override
 	public TrackingSession trackDelivery(final DeliveryId deliveryId, final TrackingSessionEventObserver observer)
 			throws DeliveryNotFoundException {
-		logger.log(Level.INFO, "Track delivery " + deliveryId);
+		logger.info("Track delivery " + deliveryId);
 		final TrackingSession trackingSession = this.trackingSessionRepository.createSession();
 		trackingSession.bindTrackingSessionEventNotifier(observer);
 		this.deliveryRepository.getDelivery(deliveryId).addDeliveryObserver(trackingSession);
@@ -77,7 +76,7 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 	@Override
 	public void stopTrackingDelivery(final DeliveryId deliveryId, final String trackingSessionId)
 			throws DeliveryNotFoundException, TrackingSessionNotFoundException {
-		logger.log(Level.INFO, "Stop tracking delivery " + deliveryId);
+		logger.info("Stop tracking delivery " + deliveryId);
 		this.deliveryRepository.getDelivery(deliveryId)
 				.removeDeliveryObserver(this.trackingSessionRepository.getSession(trackingSessionId));
 		this.trackingSessionRepository.removeSession(trackingSessionId);

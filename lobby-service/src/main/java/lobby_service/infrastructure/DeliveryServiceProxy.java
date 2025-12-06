@@ -12,9 +12,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Calendar;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @Adapter
 public class DeliveryServiceProxy implements DeliveryService {
+
+    static Logger logger = Logger.getLogger("[DeliveryServiceProxy]");
 
     private final String serviceURI;
 
@@ -41,7 +44,7 @@ public class DeliveryServiceProxy implements DeliveryService {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("Response Code: " + response.statusCode());
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.severe(ex.getMessage());
             throw new CreateDeliveryFailedException();
         }
 
@@ -74,7 +77,7 @@ public class DeliveryServiceProxy implements DeliveryService {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("Response Code: " + response.statusCode());
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.severe(ex.getMessage());
             throw new TrackDeliveryFailedException();
         }
 

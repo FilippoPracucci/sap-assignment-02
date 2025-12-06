@@ -47,7 +47,7 @@ public class LoginSteps {
 
     private void login(final String userId, final String pwd) {
         try {
-            this.lobbyService.login(userId, pwd);
+            this.lobbyService.login(new lobby_service.domain.UserId(userId), pwd);
         } catch (final LoginFailedException e) {
             this.lastError = e.getMessage();
             return;

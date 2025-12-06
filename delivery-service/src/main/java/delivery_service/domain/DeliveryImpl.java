@@ -1,5 +1,6 @@
 package delivery_service.domain;
 
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -94,8 +95,7 @@ public class DeliveryImpl implements Delivery, DroneObserver {
             try {
                 if (this.deliveryDetail.expectedShippingMoment().toInstant().isAfter(TimeConverter.getNowAsInstant())) {
                     Thread.sleep(TimeConverter.getNowAsInstant().until(
-                            this.deliveryDetail.expectedShippingMoment().toInstant(),
-                            ChronoUnit.MILLIS)
+                            this.deliveryDetail.expectedShippingMoment().toInstant(), ChronoUnit.MILLIS)
                     );
                 }
                 drone.startDrone();
