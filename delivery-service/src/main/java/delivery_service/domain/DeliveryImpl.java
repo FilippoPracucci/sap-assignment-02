@@ -1,6 +1,5 @@
 package delivery_service.domain;
 
-import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -21,9 +20,7 @@ public class DeliveryImpl implements Delivery, DroneObserver {
     ) {
         this.id = deliveryId;
         this.deliveryDetail = new DeliveryDetailImpl(this.id, weight, startingPlace, destinationPlace,
-                expectedShippingMoment.orElseGet(() ->
-                        new Calendar.Builder().setInstant(Date.from(Instant.now())).build())
-        );
+                expectedShippingMoment.orElseGet(TimeConverter::getNowAsCalendar));
         this.deliveryStatus = new DeliveryStatusImpl(this.id);
         this.deliveryStatus.setDeliveryState(deliveryState);
         this.observers = new ArrayList<>();
@@ -41,9 +38,7 @@ public class DeliveryImpl implements Delivery, DroneObserver {
     ) {
         this.id = deliveryId;
         this.deliveryDetail = new DeliveryDetailImpl(this.id, weight, startingPlace, destinationPlace,
-                expectedShippingMoment.orElseGet(() ->
-                        new Calendar.Builder().setInstant(Date.from(Instant.now())).build())
-        );
+                expectedShippingMoment.orElseGet(TimeConverter::getNowAsCalendar));
         this.deliveryStatus = new DeliveryStatusImpl(this.id);
         this.observers = new ArrayList<>();
         this.initDrone();
@@ -97,9 +92,11 @@ public class DeliveryImpl implements Delivery, DroneObserver {
         drone.addDroneObserver(this);
         Thread.ofVirtual().start(() -> {
             try {
-                if (this.deliveryDetail.expectedShippingMoment().toInstant().isAfter(Instant.now())) {
-                    Thread.sleep(Instant.now().until(this.deliveryDetail.expectedShippingMoment().toInstant(),
-                            ChronoUnit.MILLIS));
+                if (this.deliveryDetail.expectedShippingMoment().toInstant().isAfter(TimeConverter.getNowAsInstant())) {
+                    Thread.sleep(TimeConverter.getNowAsInstant().until(
+                            this.deliveryDetail.expectedShippingMoment().toInstant(),
+                            ChronoUnit.MILLIS)
+                    );
                 }
                 drone.startDrone();
             } catch (final InterruptedException e) {

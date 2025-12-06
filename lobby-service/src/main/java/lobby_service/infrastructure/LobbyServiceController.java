@@ -12,6 +12,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
+import lobby_service.domain.TimeConverter;
 import lobby_service.domain.UserId;
 
 import java.time.Instant;
@@ -32,11 +33,11 @@ public class LobbyServiceController extends VerticleBase  {
 
 	static final String API_VERSION = "v1";
 	static final String USER_SESSIONS_RESOURCE_PATH = "/api/" + API_VERSION + "/user-sessions";
-	static final String LOGIN_RESOURCE_PATH = 			"/api/" + API_VERSION + "/accounts/:accountId/login";
-	static final String CREATE_DELIVERY_RESOURCE_PATH = 	"/api/" + API_VERSION + "/user-sessions/:sessionId/create-delivery";
-	static final String TRACK_DELIVERY_RESOURCE_PATH = 		"/api/" + API_VERSION + "/user-sessions/:sessionId/track-delivery";
+	static final String LOGIN_RESOURCE_PATH = "/api/" + API_VERSION + "/accounts/:accountId/login";
+	static final String CREATE_DELIVERY_RESOURCE_PATH = "/api/" + API_VERSION + "/user-sessions/:sessionId/create-delivery";
+	static final String TRACK_DELIVERY_RESOURCE_PATH = 	"/api/" + API_VERSION + "/user-sessions/:sessionId/track-delivery";
 
-	static final String DELIVERY_SERVICE_URI = 	"/api/" + API_VERSION + "/deliveries";
+	static final String DELIVERY_SERVICE_URI = "/api/" + API_VERSION + "/deliveries";
 
 	/* Ref. to the application layer */
 	private final LobbyService lobbyService;
@@ -118,8 +119,10 @@ public class LobbyServiceController extends VerticleBase  {
 			String userSessionId = context.pathParam("sessionId");
 			var reply = new JsonObject();
 			try {
-				final Optional<Calendar> expectedShippingMoment = DeliveryJsonConverter.getExpectedShippingMoment(deliveryDetailJson);
-				if (expectedShippingMoment.isPresent() && expectedShippingMoment.get().toInstant().isBefore(Instant.now())) {
+				final Optional<Calendar> expectedShippingMoment =
+						DeliveryJsonConverter.getExpectedShippingMoment(deliveryDetailJson);
+				if (expectedShippingMoment.isPresent() && expectedShippingMoment.get().toInstant()
+						.isBefore(TimeConverter.getNowAsInstant())) {
 					reply.put("result", "error");
 					reply.put("error", "past-target-time");
 				} else {
@@ -133,7 +136,8 @@ public class LobbyServiceController extends VerticleBase  {
 					reply.put("result", "ok");
 					reply.put("deliveryId", deliveryId.id());
 					reply.put("deliveryLink", DELIVERY_SERVICE_URI + "/" + deliveryId.id());
-					reply.put("trackDeliveryLink", TRACK_DELIVERY_RESOURCE_PATH.replace(":sessionId", userSessionId));
+					reply.put("trackDeliveryLink",
+							TRACK_DELIVERY_RESOURCE_PATH.replace(":sessionId", userSessionId));
 				}
 				sendReply(context.response(), reply);
 			} catch (Exception ex) {
