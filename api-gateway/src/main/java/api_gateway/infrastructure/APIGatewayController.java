@@ -45,6 +45,9 @@ public class APIGatewayController extends VerticleBase  {
 	static final String TRACKING_RESOURCE_PATH = DELIVERY_RESOURCE_PATH + "/:trackingSessionId";
 	static final String STOP_TRACKING_RESOURCE_PATH = TRACKING_RESOURCE_PATH + "/stop";
 	static final String WS_EVENT_CHANNEL_PATH = "/api/" + API_VERSION + "/events";
+
+	/* Health check endpoint */
+	static final String HEALTH_CHECK_ENDPOINT = "/api/" + API_VERSION + "/health";
 	
 	/* proxies to interact with the services */
 	private final AccountService accountService;
@@ -77,6 +80,8 @@ public class APIGatewayController extends VerticleBase  {
 		router.route(HttpMethod.GET, DELIVERY_RESOURCE_PATH).handler(this::getDeliveryDetail);
 		router.route(HttpMethod.GET, TRACKING_RESOURCE_PATH).handler(this::getDeliveryStatus);
 		router.route(HttpMethod.POST, STOP_TRACKING_RESOURCE_PATH).handler(this::stopTrackingDelivery);
+
+		router.route(HttpMethod.GET, HEALTH_CHECK_ENDPOINT).handler(this::healthCheckHandler);
 		handleEventSubscription(server, WS_EVENT_CHANNEL_PATH);
 
 		/* static files */
@@ -88,6 +93,13 @@ public class APIGatewayController extends VerticleBase  {
 			.listen(port);
 		fut.onSuccess(res -> logger.log(Level.INFO, "API Gateway ready - port: " + this.port));
 		return fut;
+	}
+
+	protected void healthCheckHandler(final RoutingContext context) {
+		logger.info("Health check request " + context.currentRoute().getPath());
+		final JsonObject reply = new JsonObject();
+		reply.put("status", "UP");
+		sendReply(context.response(), reply);
 	}
 
 
