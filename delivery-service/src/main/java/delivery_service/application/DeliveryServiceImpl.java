@@ -2,7 +2,9 @@ package delivery_service.application;
 
 import delivery_service.domain.*;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -16,9 +18,11 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 
     private DeliveryRepository deliveryRepository;
     private final TrackingSessions trackingSessionRepository;
+	private final List<DeliveryServiceEventObserver> observers;
 
     public DeliveryServiceImpl() {
     	this.trackingSessionRepository = new TrackingSessions();
+		this.observers = new ArrayList<>();
     }
 
 	@Override
@@ -60,6 +64,10 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
         } catch (InvalidDeliveryIdException | DeliveryAlreadyPresentException e) {
             throw new RuntimeException(e);
         }
+		this.observers.forEach(obs -> {
+			obs.notifyNewDeliveryCreated();
+			delivery.addDeliveryObserver(obs);
+		});
         return delivery.getId();
 	}
 
@@ -82,13 +90,6 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 		this.trackingSessionRepository.removeSession(trackingSessionId);
 	}
 
-	public void bindDeliveryRepository(final DeliveryRepository repo) {
-    	this.deliveryRepository = repo;
-		this.deliveryRepository.getAllDeliveries().stream()
-				.filter(delivery -> !delivery.getDeliveryStatus().getState().equals(DeliveryState.DELIVERED))
-				.forEach(delivery -> delivery.addDeliveryObserver(this));
-    }
-
 	@Override
 	public void notifyDeliveryEvent(final DeliveryEvent event) {
 		logger.info("DeliveryService: event " + event);
@@ -101,5 +102,16 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 		} catch (final DeliveryNotFoundException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public void bindDeliveryRepository(final DeliveryRepository repo) {
+		this.deliveryRepository = repo;
+		this.deliveryRepository.getAllDeliveries().stream()
+				.filter(delivery -> !delivery.getDeliveryStatus().getState().equals(DeliveryState.DELIVERED))
+				.forEach(delivery -> delivery.addDeliveryObserver(this));
+	}
+
+	public void addObserver(final DeliveryServiceEventObserver obs) {
+		this.observers.add(obs);
 	}
 }

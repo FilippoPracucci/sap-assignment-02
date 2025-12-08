@@ -3,6 +3,8 @@ package delivery_service.infrastructure;
 import delivery_service.application.DeliveryServiceImpl;
 import io.vertx.core.Vertx;
 
+import java.util.logging.Logger;
+
 /**
  * @author Bedeschi Federica   federica.bedeschi4@studio.unibo.it
  * @author Pracucci Filippo    filippo.pracucci@studio.unibo.it
@@ -11,10 +13,16 @@ import io.vertx.core.Vertx;
 public class DeliveryServiceMain {
 
 	static final int DELIVERY_SERVICE_PORT = 9002;
+	static final int PROMETHEUS_SERVER_PORT = 9400;
 
 	public static void main(String[] args) {
 		final var deliveryService = new DeliveryServiceImpl();
 		deliveryService.bindDeliveryRepository(new FileBasedDeliveryRepository());
+		try {
+			deliveryService.addObserver(new PrometheusDeliveryServiceObserver(PROMETHEUS_SERVER_PORT));
+		} catch (final ObservabilityMetricServerException ex) {
+			Logger.getLogger("[DeliveryServiceMain]").info("Observability metric server failed to start");
+		}
 		Vertx.vertx().deployVerticle(new DeliveryServiceController(deliveryService, DELIVERY_SERVICE_PORT));
 	}
 
