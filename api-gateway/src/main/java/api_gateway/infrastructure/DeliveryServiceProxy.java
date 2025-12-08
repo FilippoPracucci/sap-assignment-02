@@ -6,19 +6,17 @@ import common.hexagonal.Adapter;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
-import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.util.Optional;
 
 @Adapter
 public class DeliveryServiceProxy extends HTTPSyncBaseProxy implements DeliveryService {
 
-    private final String serviceURI;
     private final String wsAddress;
     private final int wsPort;
 
     public DeliveryServiceProxy(final String serviceAPIEndpoint, final String wsAddress, final int wsPort)  {
-        this.serviceURI = serviceAPIEndpoint;
+        super(serviceAPIEndpoint);
         this.wsAddress = wsAddress;
         this.wsPort = wsPort;
     }
@@ -26,26 +24,24 @@ public class DeliveryServiceProxy extends HTTPSyncBaseProxy implements DeliveryS
     @Override
     public DeliveryDetail getDeliveryDetail(final DeliveryId deliveryId) throws DeliveryNotFoundException,
             ServiceNotAvailableException {
-        try {
-            final HttpResponse<String> response = doGet( this.serviceURI + "/api/v1/deliveries/" + deliveryId.id());
-            if (response.statusCode() == 200) {
-                final JsonObject responseBody = new JsonObject(response.body());
-                if (responseBody.getString("result").equals("error")) {
-                    throw new DeliveryNotFoundException();
-                }
-                final JsonObject deliveryDetail = responseBody.getJsonObject("deliveryDetail");
-                return new DeliveryDetailImpl(
-                        deliveryId,
-                        deliveryDetail.getNumber("weight").doubleValue(),
-                        DeliveryJsonConverter.getAddress(deliveryDetail,"startingPlace"),
-                        DeliveryJsonConverter.getAddress(deliveryDetail,"destinationPlace"),
-                        DeliveryJsonConverter.getExpectedShippingMoment(deliveryDetail)
-                                .orElseThrow(RuntimeException::new)
-                );
-            } else {
-                throw new ServiceNotAvailableException();
+        final HttpResponse<String> response = doGet("/api/v1/deliveries/" + deliveryId.id());
+        if (response.statusCode() == 200) {
+            this.incrementSuccessfulRequests();
+            final JsonObject responseBody = new JsonObject(response.body());
+            if (responseBody.getString("result").equals("error")) {
+                throw new DeliveryNotFoundException();
             }
-        } catch (final IOException | InterruptedException e) {
+            final JsonObject deliveryDetail = responseBody.getJsonObject("deliveryDetail");
+            return new DeliveryDetailImpl(
+                    deliveryId,
+                    deliveryDetail.getNumber("weight").doubleValue(),
+                    DeliveryJsonConverter.getAddress(deliveryDetail,"startingPlace"),
+                    DeliveryJsonConverter.getAddress(deliveryDetail,"destinationPlace"),
+                    DeliveryJsonConverter.getExpectedShippingMoment(deliveryDetail)
+                            .orElseThrow(RuntimeException::new)
+            );
+        } else {
+            this.incrementFailedRequests();
             throw new ServiceNotAvailableException();
         }
     }
@@ -53,32 +49,30 @@ public class DeliveryServiceProxy extends HTTPSyncBaseProxy implements DeliveryS
     @Override
     public DeliveryStatus getDeliveryStatus(final DeliveryId deliveryId, final String trackingSessionId)
             throws DeliveryNotFoundException, TrackingSessionNotFoundException, ServiceNotAvailableException {
-        try {
-            final HttpResponse<String> response = doGet( this.serviceURI + "/api/v1/deliveries/" + deliveryId.id()
-                    + "/" + trackingSessionId);
-            if (response.statusCode() == 200) {
-                final JsonObject responseBody = new JsonObject(response.body());
-                if (responseBody.getString("result").equals("error")) {
-                    if (responseBody.getString("error") != null
-                            && responseBody.getString("error").equals("tracking-session-not-present")) {
-                        throw new TrackingSessionNotFoundException();
-                    }
-                    throw new DeliveryNotFoundException();
+        final HttpResponse<String> response = doGet("/api/v1/deliveries/" + deliveryId.id()
+                + "/" + trackingSessionId);
+        if (response.statusCode() == 200) {
+            this.incrementSuccessfulRequests();
+            final JsonObject responseBody = new JsonObject(response.body());
+            if (responseBody.getString("result").equals("error")) {
+                if (responseBody.getString("error") != null
+                        && responseBody.getString("error").equals("tracking-session-not-present")) {
+                    throw new TrackingSessionNotFoundException();
                 }
-                final JsonObject deliveryStatus = responseBody.getJsonObject("deliveryStatus");
-                return new DeliveryStatusImpl(
-                        deliveryId,
-                        DeliveryState.valueOfLabel(deliveryStatus.getString("deliveryState")),
-                        deliveryStatus.containsKey("timeLeft")
-                                ? Optional.of(new DeliveryTime(
-                                    Integer.parseInt(deliveryStatus.getString("timeLeft").split(" ")[0]), 0
-                                ))
-                                : Optional.empty()
-                );
-            } else {
-                throw new ServiceNotAvailableException();
+                throw new DeliveryNotFoundException();
             }
-        } catch (final IOException | InterruptedException e) {
+            final JsonObject deliveryStatus = responseBody.getJsonObject("deliveryStatus");
+            return new DeliveryStatusImpl(
+                    deliveryId,
+                    DeliveryState.valueOfLabel(deliveryStatus.getString("deliveryState")),
+                    deliveryStatus.containsKey("timeLeft")
+                            ? Optional.of(new DeliveryTime(
+                                Integer.parseInt(deliveryStatus.getString("timeLeft").split(" ")[0]), 0
+                            ))
+                            : Optional.empty()
+            );
+        } else {
+            this.incrementFailedRequests();
             throw new ServiceNotAvailableException();
         }
     }
@@ -86,22 +80,20 @@ public class DeliveryServiceProxy extends HTTPSyncBaseProxy implements DeliveryS
     @Override
     public void stopTrackingDelivery(final DeliveryId deliveryId, final String trackingSessionId)
             throws DeliveryNotFoundException, TrackingSessionNotFoundException, ServiceNotAvailableException {
-        try {
-            final HttpResponse<String> response = doPost( this.serviceURI + "/api/v1/deliveries/" + deliveryId.id()
-                    + "/" + trackingSessionId + "/stop", new JsonObject());
-            if (response.statusCode() == 200) {
-                final JsonObject responseBody = new JsonObject(response.body());
-                if (responseBody.getString("result").equals("error")) {
-                    if (responseBody.getString("error") != null
-                            && responseBody.getString("error").equals("Delivery does not exist")) {
-                        throw new DeliveryNotFoundException();
-                    }
-                    throw new TrackingSessionNotFoundException();
+        final HttpResponse<String> response = doPost("/api/v1/deliveries/" + deliveryId.id()
+                + "/" + trackingSessionId + "/stop", new JsonObject());
+        if (response.statusCode() == 200) {
+            this.incrementSuccessfulRequests();
+            final JsonObject responseBody = new JsonObject(response.body());
+            if (responseBody.getString("result").equals("error")) {
+                if (responseBody.getString("error") != null
+                        && responseBody.getString("error").equals("Delivery does not exist")) {
+                    throw new DeliveryNotFoundException();
                 }
-            } else {
-                throw new ServiceNotAvailableException();
+                throw new TrackingSessionNotFoundException();
             }
-        } catch (final IOException | InterruptedException e) {
+        } else {
+            this.incrementFailedRequests();
             throw new ServiceNotAvailableException();
         }
     }
