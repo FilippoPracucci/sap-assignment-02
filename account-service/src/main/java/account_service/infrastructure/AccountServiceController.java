@@ -31,6 +31,9 @@ public class AccountServiceController extends VerticleBase {
 	static final String CHECK_PWD_RESOURCE_PATH = "/api/" + API_VERSION + "/accounts/:accountId/check-pwd";
 	static final String LOGIN_PATH = "/api/" + API_VERSION + "/accounts/:accountId/login";
 
+	/* Health check endpoint */
+	static final String HEALTH_CHECK_ENDPOINT = "/api/" + API_VERSION + "/health";
+
 	/* Ref. to the application layer */
 	private final AccountService accountService;
 
@@ -47,6 +50,7 @@ public class AccountServiceController extends VerticleBase {
 		router.route(HttpMethod.POST, ACCOUNTS_RESOURCE_PATH).handler(this::createAccount);
 		router.route(HttpMethod.GET, ACCOUNT_RESOURCE_PATH).handler(this::getAccountInfo);
 		router.route(HttpMethod.POST, CHECK_PWD_RESOURCE_PATH).handler(this::checkAccountPassword);
+		router.route(HttpMethod.GET, HEALTH_CHECK_ENDPOINT).handler(this::healthCheckHandler);
 
 		/* static files */
 
@@ -61,6 +65,13 @@ public class AccountServiceController extends VerticleBase {
 		});
 
 		return fut;
+	}
+
+	protected void healthCheckHandler(final RoutingContext context) {
+		logger.info("Health check request " + context.currentRoute().getPath());
+		final JsonObject reply = new JsonObject();
+		reply.put("status", "UP");
+		sendReply(context.response(), reply);
 	}
 
 	/* List of handlers mapping the API */

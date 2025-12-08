@@ -36,6 +36,9 @@ public class DeliveryServiceController extends VerticleBase  {
 	static final String TRACK_RESOURCE_PATH =  DELIVERY_RESOURCE_PATH +   "/track";
 	static final String TRACKING_RESOURCE_PATH = DELIVERY_RESOURCE_PATH + "/:trackingSessionId";
 	static final String STOP_TRACKING_RESOURCE_PATH = TRACKING_RESOURCE_PATH + "/stop";
+
+	/* Health check endpoint */
+	static final String HEALTH_CHECK_ENDPOINT = "/api/" + API_VERSION + "/health";
 	
 	/* Ref. to the application layer */
 	private final DeliveryService deliveryService;
@@ -55,6 +58,7 @@ public class DeliveryServiceController extends VerticleBase  {
 		router.route(HttpMethod.POST, TRACK_RESOURCE_PATH).handler(this::trackDelivery);
 		router.route(HttpMethod.POST, STOP_TRACKING_RESOURCE_PATH).handler(this::stopTrackingDelivery);
 		router.route(HttpMethod.GET, TRACKING_RESOURCE_PATH).handler(this::getDeliveryStatus);
+		router.route(HttpMethod.GET, HEALTH_CHECK_ENDPOINT).handler(this::healthCheckHandler);
 		this.handleEventSubscription(server, "/api/" + API_VERSION + "/events");
 
 		/* static files */
@@ -69,6 +73,13 @@ public class DeliveryServiceController extends VerticleBase  {
 		});
 
 		return fut;
+	}
+
+	protected void healthCheckHandler(final RoutingContext context) {
+		logger.info("Health check request " + context.currentRoute().getPath());
+		final JsonObject reply = new JsonObject();
+		reply.put("status", "UP");
+		sendReply(context.response(), reply);
 	}
 
 	/**

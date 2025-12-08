@@ -37,6 +37,9 @@ public class LobbyServiceController extends VerticleBase  {
 
 	static final String DELIVERY_SERVICE_URI = "/api/" + API_VERSION + "/deliveries";
 
+	/* Health check endpoint */
+	static final String HEALTH_CHECK_ENDPOINT = "/api/" + API_VERSION + "/health";
+
 	/* Ref. to the application layer */
 	private final LobbyService lobbyService;
 	
@@ -55,6 +58,7 @@ public class LobbyServiceController extends VerticleBase  {
 		router.route(HttpMethod.POST, LOGIN_RESOURCE_PATH).handler(this::login);
 		router.route(HttpMethod.POST, CREATE_DELIVERY_RESOURCE_PATH).handler(this::createDelivery);
 		router.route(HttpMethod.POST, TRACK_DELIVERY_RESOURCE_PATH).handler(this::trackDelivery);
+		router.route(HttpMethod.GET, HEALTH_CHECK_ENDPOINT).handler(this::healthCheckHandler);
 
 		/* static files */
 		router.route("/public/*").handler(StaticHandler.create());
@@ -65,6 +69,13 @@ public class LobbyServiceController extends VerticleBase  {
 			.listen(port);
 		fut.onSuccess(res -> logger.info("Lobby Service ready - port: " + port));
 		return fut;
+	}
+
+	protected void healthCheckHandler(final RoutingContext context) {
+		logger.info("Health check request " + context.currentRoute().getPath());
+		final JsonObject reply = new JsonObject();
+		reply.put("status", "UP");
+		sendReply(context.response(), reply);
 	}
 	
 	/**
