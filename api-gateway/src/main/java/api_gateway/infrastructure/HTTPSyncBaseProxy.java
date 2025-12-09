@@ -27,11 +27,11 @@ abstract public class HTTPSyncBaseProxy {
 		this.serviceURI = serviceURI;
 	}
 
-	protected HttpResponse<String> doPost(String uri, JsonObject body) throws ServiceNotAvailableException {
+	protected HttpResponse<String> doPost(final String uri, final JsonObject body) throws ServiceNotAvailableException {
 		return this.doRequest(uri, true, Optional.of(body));
     }
 
-	protected HttpResponse<String> doGet(String uri) throws ServiceNotAvailableException {
+	protected HttpResponse<String> doGet(final String uri) throws ServiceNotAvailableException {
 		return this.doRequest(uri, false, Optional.empty());
 	}
 
@@ -45,7 +45,7 @@ abstract public class HTTPSyncBaseProxy {
 		if (isPost) {
 			request = HttpRequest.newBuilder().uri(URI.create(this.serviceURI + uri))
 					.header("Accept", "application/json")
-					.POST(BodyPublishers.ofString(body.toString()))
+					.POST(BodyPublishers.ofString(body.orElse(new JsonObject()).toString()))
 					.build();
 		} else {
 			request = HttpRequest.newBuilder().uri(URI.create(this.serviceURI + uri)).GET().build();
