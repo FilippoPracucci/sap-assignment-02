@@ -16,35 +16,37 @@ import java.util.logging.Logger;
 public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 	static Logger logger = Logger.getLogger("[Delivery Service]");
 
-    private DeliveryRepository deliveryRepository;
+    private DeliveryEventStore deliveryEventStore;
+	private final Deliveries deliveries;
     private final TrackingSessions trackingSessionRepository;
 	private final List<DeliveryServiceEventObserver> observers;
 
     public DeliveryServiceImpl() {
     	this.trackingSessionRepository = new TrackingSessions();
+		this.deliveries = new Deliveries();
 		this.observers = new ArrayList<>();
     }
 
 	@Override
 	public DeliveryDetail getDeliveryDetail(final DeliveryId deliveryId) throws DeliveryNotFoundException {
 		logger.info("get delivery " + deliveryId + " detail");
-		if (!this.deliveryRepository.isPresent(deliveryId)) {
+		if (!this.deliveries.isPresent(deliveryId)) {
 			throw new DeliveryNotFoundException();
 		}
-		return this.deliveryRepository.getDelivery(deliveryId).getDeliveryDetail();
+		return this.deliveries.getDelivery(deliveryId).getDeliveryDetail();
 	}
 
 	@Override
 	public DeliveryStatus getDeliveryStatus(final DeliveryId deliveryId, final String trackingSessionId)
 			throws DeliveryNotFoundException, TrackingSessionNotFoundException {
 		logger.info("get delivery " + deliveryId.id() + " status");
-        if (!this.deliveryRepository.isPresent(deliveryId)) {
+		if (!this.deliveries.isPresent(deliveryId)) {
 			throw new DeliveryNotFoundException();
 		}
 		if (!this.trackingSessionRepository.isPresent(trackingSessionId)) {
 			throw new TrackingSessionNotFoundException();
 		}
-		return this.deliveryRepository.getDelivery(deliveryId).getDeliveryStatus();
+		return this.deliveries.getDelivery(deliveryId).getDeliveryStatus();
 	}
 
 	@Override
@@ -55,15 +57,15 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 	@Override
 	public DeliveryId createNewDelivery(final double weight, final Address startingPlace,
 										final Address destinationPlace, final Optional<Calendar> expectedShippingMoment) {
-		final Delivery delivery = new DeliveryImpl(this.deliveryRepository.getNextId(), weight, startingPlace,
-				destinationPlace, expectedShippingMoment);
-		delivery.addDeliveryObserver(this);
+		final Delivery delivery = new DeliveryImpl(this.deliveryEventStore.getNextId(), weight, startingPlace,
+				destinationPlace, expectedShippingMoment, List.of(this));
 		logger.info("create New Delivery " + delivery.getId().id());
-        try {
-            this.deliveryRepository.addDelivery(delivery);
+		this.deliveries.addDelivery(delivery);
+        /*try {
+            this.DeliveryRepository.addDelivery(delivery);
         } catch (InvalidDeliveryIdException | DeliveryAlreadyPresentException e) {
             throw new RuntimeException(e);
-        }
+        }*/
 		this.observers.forEach(obs -> {
 			obs.notifyNewDeliveryCreated();
 			delivery.addDeliveryObserver(obs);
@@ -75,9 +77,12 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 	public TrackingSession trackDelivery(final DeliveryId deliveryId, final TrackingSessionEventObserver observer)
 			throws DeliveryNotFoundException {
 		logger.info("Track delivery " + deliveryId);
+		if (!this.deliveries.isPresent(deliveryId)) {
+			throw new DeliveryNotFoundException();
+		}
 		final TrackingSession trackingSession = this.trackingSessionRepository.createSession();
 		trackingSession.bindTrackingSessionEventNotifier(observer);
-		this.deliveryRepository.getDelivery(deliveryId).addDeliveryObserver(trackingSession);
+		this.deliveries.getDelivery(deliveryId).addDeliveryObserver(trackingSession);
 		return trackingSession;
 	}
 
@@ -85,7 +90,10 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 	public void stopTrackingDelivery(final DeliveryId deliveryId, final String trackingSessionId)
 			throws DeliveryNotFoundException, TrackingSessionNotFoundException {
 		logger.info("Stop tracking delivery " + deliveryId);
-		this.deliveryRepository.getDelivery(deliveryId)
+		if (!this.deliveries.isPresent(deliveryId)) {
+			throw new DeliveryNotFoundException();
+		}
+		this.deliveries.getDelivery(deliveryId)
 				.removeDeliveryObserver(this.trackingSessionRepository.getSession(trackingSessionId));
 		this.trackingSessionRepository.removeSession(trackingSessionId);
 	}
@@ -93,22 +101,20 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 	@Override
 	public void notifyDeliveryEvent(final DeliveryEvent event) {
 		logger.info("DeliveryService: event " + event);
-		try {
-			if (event instanceof Shipped) {
-				this.deliveryRepository.updateDeliveryState(((Shipped) event).id(), DeliveryState.SHIPPING);
-			} else if (event instanceof Delivered) {
-				this.deliveryRepository.updateDeliveryState(((Delivered) event).id(), DeliveryState.DELIVERED);
-			}
-		} catch (final DeliveryNotFoundException e) {
-			throw new RuntimeException(e);
-		}
+		this.deliveryEventStore.storeDeliveryEvent(event);
 	}
 
-	public void bindDeliveryRepository(final DeliveryRepository repo) {
-		this.deliveryRepository = repo;
-		this.deliveryRepository.getAllDeliveries().stream()
-				.filter(delivery -> !delivery.getDeliveryStatus().getState().equals(DeliveryState.DELIVERED))
-				.forEach(delivery -> delivery.addDeliveryObserver(this));
+	public void bindDeliveryRepository(final DeliveryEventStore store) {
+		this.deliveryEventStore = store;
+		this.deliveryEventStore.retrieveDeliveryEvents().forEach((deliveryId, events) -> {
+			final Delivery delivery = new DeliveryImpl(deliveryId);
+			events.forEach(delivery::applyEvent);
+			if (!delivery.getDeliveryStatus().getState().equals(DeliveryState.DELIVERED)) {
+				delivery.addDeliveryObserver(this);
+				delivery.startDeliveringProcess();
+			}
+			this.deliveries.addDelivery(delivery);
+		});
 	}
 
 	public void addObserver(final DeliveryServiceEventObserver obs) {

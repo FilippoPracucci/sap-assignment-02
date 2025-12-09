@@ -1,7 +1,5 @@
 package delivery_service.domain;
 
-import delivery_service.domain.DroneObserver;
-
 interface Drone {
 
     void startDrone();

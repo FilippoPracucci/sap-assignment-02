@@ -17,7 +17,7 @@ public class DeliveryServiceMain {
 
 	public static void main(String[] args) {
 		final var deliveryService = new DeliveryServiceImpl();
-		deliveryService.bindDeliveryRepository(new FileBasedDeliveryRepository());
+		deliveryService.bindDeliveryRepository(new FileBasedDeliveryEventStore());
 		try {
 			deliveryService.addObserver(new PrometheusDeliveryServiceObserver(PROMETHEUS_SERVER_PORT));
 		} catch (final ObservabilityMetricServerException ex) {

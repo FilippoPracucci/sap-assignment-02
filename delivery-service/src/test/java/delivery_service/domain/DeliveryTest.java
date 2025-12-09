@@ -1,10 +1,10 @@
 package delivery_service.domain;
 
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 
+import java.util.ArrayList;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class DeliveryTest {
 
@@ -52,7 +52,7 @@ public class DeliveryTest {
                 this.startingPlace,
                 this.destinationPlace,
                 Optional.empty(),
-                DeliveryState.DELIVERED
+                new ArrayList<>()
         );
     }
 }

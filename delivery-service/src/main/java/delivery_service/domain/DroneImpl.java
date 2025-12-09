@@ -2,6 +2,7 @@ package delivery_service.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 class DroneImpl implements Drone, Runnable {
 
@@ -13,11 +14,14 @@ class DroneImpl implements Drone, Runnable {
     private final List<DroneObserver> droneObservers;
     private final DeliveryDetail deliveryDetail;
     private final int deliveryDurationInHours;
+    private final boolean isRestarted;
 
-    public DroneImpl(final DeliveryDetail deliveryDetail) {
+    public DroneImpl(final DeliveryDetail deliveryDetail, Optional<DeliveryTime> timeLeft) {
         this.deliveryDetail = deliveryDetail;
         this.droneObservers = new ArrayList<>();
-        this.deliveryDurationInHours = DURATION_MULTIPLIER * ((int) this.deliveryDetail.weight());
+        this.deliveryDurationInHours = timeLeft.map(DeliveryTime::toHours)
+                .orElse(DURATION_MULTIPLIER * ((int) this.deliveryDetail.weight()));
+        this.isRestarted = timeLeft.isPresent();
     }
 
     @Override
@@ -27,13 +31,15 @@ class DroneImpl implements Drone, Runnable {
 
     @Override
     public void run() {
-        this.notifyDeliveryEvent(new Shipped(
-                this.deliveryDetail.getId(),
-                new DeliveryTime(
-                        this.deliveryDurationInHours / HOURS_IN_A_DAY,
-                        this.deliveryDurationInHours % HOURS_IN_A_DAY
-                )
-        ));
+        if (!this.isRestarted) {
+            this.notifyDeliveryEvent(new Shipped(
+                    this.deliveryDetail.getId(),
+                    new DeliveryTime(
+                            this.deliveryDurationInHours / HOURS_IN_A_DAY,
+                            this.deliveryDurationInHours % HOURS_IN_A_DAY
+                    )
+            ));
+        }
         for (int i = 0; i < this.deliveryDurationInHours; i++) {
             try {
                 Thread.sleep(PERIOD_IN_HOURS * HOUR_IN_MILLISECONDS);

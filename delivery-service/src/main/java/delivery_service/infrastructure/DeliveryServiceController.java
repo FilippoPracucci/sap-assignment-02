@@ -142,10 +142,7 @@ public class DeliveryServiceController extends VerticleBase  {
 				reply.put("result", "ok");
 				reply.put(
 						"deliveryDetail",
-						DeliveryJsonConverter.toJson(
-								this.deliveryService.getDeliveryDetail(deliveryId),
-								Optional.empty()
-						)
+						DeliveryJsonConverter.toJson(this.deliveryService.getDeliveryDetail(deliveryId))
 				);
 				sendReply(context.response(), reply);
 			} catch (final DeliveryNotFoundException ex) {

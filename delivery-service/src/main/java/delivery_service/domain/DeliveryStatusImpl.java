@@ -1,8 +1,5 @@
 package delivery_service.domain;
 
-import delivery_service.domain.DeliveryNotShippedYetException;
-import delivery_service.domain.MutableDeliveryStatus;
-
 import java.util.Optional;
 
 class DeliveryStatusImpl implements MutableDeliveryStatus {

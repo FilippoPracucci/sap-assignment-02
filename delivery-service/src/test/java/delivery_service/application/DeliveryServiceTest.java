@@ -3,7 +3,7 @@ package delivery_service.application;
 import delivery_service.domain.Address;
 import delivery_service.domain.DeliveryDetail;
 import delivery_service.domain.DeliveryId;
-import delivery_service.infrastructure.FileBasedDeliveryRepository;
+import delivery_service.infrastructure.FileBasedDeliveryEventStore;
 import org.junit.jupiter.api.*;
 
 import java.util.Optional;
@@ -22,7 +22,7 @@ public class DeliveryServiceTest {
     @BeforeEach
     public void setUp() {
         this.deliveryService = new DeliveryServiceImpl();
-        this.deliveryService.bindDeliveryRepository(new FileBasedDeliveryRepository());
+        this.deliveryService.bindDeliveryRepository(new FileBasedDeliveryEventStore());
         this.id = this.deliveryService.createNewDelivery(WEIGHT, this.startingPlace, this.destinationPlace,
                 Optional.empty());
     }

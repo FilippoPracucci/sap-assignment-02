@@ -1,7 +1,6 @@
 package delivery_service.application;
 
 import common.ddd.Repository;
-import delivery_service.application.TrackingSessionNotFoundException;
 
 import java.util.HashMap;
 import java.util.logging.Logger;

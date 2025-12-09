@@ -19,13 +19,13 @@ import java.util.logging.Logger;
  * Deliveries Repository
  * 
  */
-@Adapter
+/*@Adapter
 public class FileBasedDeliveryRepository implements DeliveryRepository {
 	static Logger logger = Logger.getLogger("[DeliveryDB]");
 
 	private static final String DELIVERY_PREFIX = "delivery-";
 
-	/* db file */
+	// db file
 	static final String DB_DELIVERIES_PATH = "./delivery-service/deliveries.json";
 
 	private final HashMap<DeliveryId, Delivery> deliveries;
@@ -121,3 +121,4 @@ public class FileBasedDeliveryRepository implements DeliveryRepository {
 		}
 	}
 }
+*/

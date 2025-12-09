@@ -1,26 +1,15 @@
 package delivery_service.infrastructure;
 
 import delivery_service.domain.*;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.time.Instant;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class DeliveryJsonConverter {
-
-    public static Delivery fromJson(final JsonObject json) {
-        return new DeliveryImpl(
-                new DeliveryId(json.getString("deliveryId")),
-                json.getNumber("weight").doubleValue(),
-                getAddress(json, "startingPlace"),
-                getAddress(json, "destinationPlace"),
-                getExpectedShippingMoment(json),
-                DeliveryState.valueOfLabel(json.getString("state"))
-        );
-    }
 
     public static Address getAddress(final JsonObject json, final String key) {
         return new Address(
@@ -43,7 +32,7 @@ public class DeliveryJsonConverter {
                 : Optional.empty();
     }
 
-    public static JsonObject toJson(final DeliveryDetail deliveryDetail, final Optional<DeliveryState> deliveryState) {
+    public static JsonObject toJson(final DeliveryDetail deliveryDetail) {
         final JsonObject obj = new JsonObject();
         obj.put("deliveryId", deliveryDetail.getId().id());
         obj.put("weight", deliveryDetail.weight());
@@ -62,7 +51,77 @@ public class DeliveryJsonConverter {
                 "hours", deliveryDetail.expectedShippingMoment().get(Calendar.HOUR_OF_DAY),
                 "minutes", deliveryDetail.expectedShippingMoment().get(Calendar.MINUTE))
         ));
-        deliveryState.ifPresent(state -> obj.put("state", state.getLabel()));
         return obj;
+    }
+
+    private static JsonObject toJson(final String key, final DeliveryTime deliveryTime) {
+        return new JsonObject(Map.of(key, new JsonObject(Map.of(
+                "days", deliveryTime.days(),
+                "hours", deliveryTime.hours())))
+        );
+    }
+
+    public static JsonObject toJson(final Integer eventId, final DeliveryEvent event) {
+        return switch (event) {
+            case DeliveryCreated deliveryCreated -> new JsonObject(Map.of(
+                    "eventId", eventId,
+                    "eventType", DeliveryCreated.class.getSimpleName(),
+                    "deliveryId", event.id().id(),
+                    "eventData", toJson(deliveryCreated.deliveryDetail())
+            ));
+            case Shipped shipped -> new JsonObject(Map.of(
+                    "eventId", eventId,
+                    "eventType", Shipped.class.getSimpleName(),
+                    "deliveryId", event.id().id(),
+                    "eventData", toJson("timeLeft", shipped.timeLeft())
+            ));
+            case TimeElapsed timeElapsed -> new JsonObject(Map.of(
+                    "eventId", eventId,
+                    "eventType", TimeElapsed.class.getSimpleName(),
+                    "deliveryId", event.id().id(),
+                    "eventData", toJson("time", timeElapsed.time())
+            ));
+            case Delivered delivered -> new JsonObject(Map.of(
+                    "eventId", eventId,
+                    "eventType", Delivered.class.getSimpleName(),
+                    "deliveryId", event.id().id(),
+                    "eventData", new JsonObject()
+            ));
+            default -> throw new IllegalArgumentException("Event type not supported");
+        };
+    }
+
+    private static DeliveryEvent fromJson(final JsonObject event) {
+        final DeliveryId deliveryId = new DeliveryId(event.getString("deliveryId"));
+        final JsonObject eventData = event.getJsonObject("eventData");
+        return switch (event.getString("eventType")) {
+            case "DeliveryCreated" -> new DeliveryCreated(deliveryId, new DeliveryDetailImpl(
+                    deliveryId,
+                    eventData.getDouble("weight"),
+                    getAddress(eventData, "startingPlace"),
+                    getAddress(eventData, "destinationPlace"),
+                    getExpectedShippingMoment(eventData).orElseThrow(() ->
+                            new IllegalStateException("Empty expectedShippingMoment"))
+            ));
+            case "Shipped" -> new Shipped(deliveryId, new DeliveryTime(
+                    eventData.getJsonObject("timeLeft").getInteger("days"),
+                    eventData.getJsonObject("timeLeft").getInteger("hours"))
+            );
+            case "TimeElapsed" -> new TimeElapsed(deliveryId, new DeliveryTime(
+                    eventData.getJsonObject("time").getInteger("days"),
+                    eventData.getJsonObject("time").getInteger("hours"))
+            );
+            case "Delivered" -> new Delivered(deliveryId);
+            default -> throw new IllegalArgumentException("Event type not supported");
+        };
+    }
+
+    public static Map<Integer, DeliveryEvent> fromJson(final JsonArray array) {
+        final Map<Integer, DeliveryEvent> events = new HashMap<>();
+        for (int i = 0; i < array.size(); i++) {
+            final JsonObject object = array.getJsonObject(i);
+            events.put(object.getInteger("eventId"), fromJson(object));
+        }
+        return events;
     }
 }
