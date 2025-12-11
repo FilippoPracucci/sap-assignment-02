@@ -1,4 +1,4 @@
-package lobby_service;
+package account_service;
 
 import account_service.application.AccountRepository;
 import account_service.application.AccountServiceImpl;

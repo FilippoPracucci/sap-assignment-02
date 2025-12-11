@@ -1,10 +1,11 @@
-package lobby_service;
+package delivery_service;
 
 import account_service.application.AccountServiceImpl;
 import account_service.infrastructure.AccountServiceController;
 import account_service.infrastructure.FileBasedAccountRepository;
-import delivery_service.application.*;
-import lobby_service.domain.Address;
+import delivery_service.application.DeliveryNotFoundException;
+import delivery_service.application.DeliveryServiceImpl;
+import delivery_service.application.TrackingSessionNotFoundException;
 import delivery_service.domain.DeliveryId;
 import delivery_service.domain.DeliveryStatus;
 import delivery_service.infrastructure.DeliveryServiceController;
@@ -18,6 +19,7 @@ import lobby_service.application.CreateDeliveryFailedException;
 import lobby_service.application.LobbyServiceImpl;
 import lobby_service.application.LoginFailedException;
 import lobby_service.application.TrackDeliveryFailedException;
+import lobby_service.domain.Address;
 import lobby_service.domain.UserId;
 import lobby_service.infrastructure.AccountServiceProxy;
 import lobby_service.infrastructure.DeliveryServiceProxy;
@@ -25,7 +27,7 @@ import org.junit.jupiter.api.Assertions;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TrackDeliverySteps {
 
