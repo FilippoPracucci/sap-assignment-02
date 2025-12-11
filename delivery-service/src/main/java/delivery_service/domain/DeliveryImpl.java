@@ -77,14 +77,7 @@ public class DeliveryImpl implements Delivery, DroneObserver {
 
     @Override
     public synchronized void notifyDeliveryEvent(final DeliveryEvent event) {
-        if (event instanceof Shipped) {
-            this.deliveryStatus.setDeliveryState(DeliveryState.SHIPPING);
-            this.deliveryStatus.setTimeLeft(((Shipped) event).timeLeft());
-        } else if (event instanceof TimeElapsed) {
-            this.deliveryStatus.subDeliveryTime(((TimeElapsed) event).time());
-        } else if (event instanceof Delivered) {
-            this.deliveryStatus.setDeliveryState(DeliveryState.DELIVERED);
-        }
+        this.applyEvent(event);
         this.observers.forEach(obs -> obs.notifyDeliveryEvent(event));
     }
 
