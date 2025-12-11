@@ -3,9 +3,6 @@ package delivery_service.domain;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 
-import java.util.ArrayList;
-import java.util.Optional;
-
 public class DeliveryTest {
 
     private static final double WEIGHT = 5.0;
@@ -21,8 +18,7 @@ public class DeliveryTest {
                 () -> assertEquals(this.id, delivery.getId()),
                 () -> assertEquals(WEIGHT, delivery.getDeliveryDetail().weight()),
                 () -> assertEquals(this.startingPlace, delivery.getDeliveryDetail().startingPlace()),
-                () -> assertEquals(this.destinationPlace, delivery.getDeliveryDetail().destinationPlace()),
-                () -> assertEquals(DeliveryState.DELIVERED, delivery.getDeliveryStatus().getState())
+                () -> assertEquals(this.destinationPlace, delivery.getDeliveryDetail().destinationPlace())
         );
     }
 
@@ -32,12 +28,12 @@ public class DeliveryTest {
         final DeliveryTime timeLeft = new DeliveryTime(0, 5);
         final DeliveryTime timeElapsed = new DeliveryTime(0, 1);
         try {
-            delivery.notifyDeliveryEvent(new Shipped(this.id, timeLeft));
+            delivery.applyEvent(new Shipped(this.id, timeLeft));
             assertEquals(DeliveryState.SHIPPING, delivery.getDeliveryStatus().getState());
             assertEquals(timeLeft, delivery.getDeliveryStatus().getTimeLeft());
-            delivery.notifyDeliveryEvent(new TimeElapsed(this.id, timeElapsed));
+            delivery.applyEvent(new TimeElapsed(this.id, timeElapsed));
             assertEquals(timeLeft.sub(timeElapsed), delivery.getDeliveryStatus().getTimeLeft());
-            delivery.notifyDeliveryEvent(new Delivered(this.id));
+            delivery.applyEvent(new Delivered(this.id));
             assertEquals(DeliveryState.DELIVERED, delivery.getDeliveryStatus().getState());
             assertFalse(delivery.getDeliveryStatus().isTimeLeftAvailable());
         } catch (final DeliveryNotShippedYetException e) {
@@ -46,13 +42,15 @@ public class DeliveryTest {
     }
 
     private DeliveryImpl createDelivery() {
-        return new DeliveryImpl(
+        final var delivery = new DeliveryImpl(this.id);
+        final DeliveryCreated event = new DeliveryCreated(this.id, new DeliveryDetailImpl(
                 this.id,
                 WEIGHT,
                 this.startingPlace,
                 this.destinationPlace,
-                Optional.empty(),
-                new ArrayList<>()
+                TimeConverter.getNowAsCalendar())
         );
+        delivery.applyEvent(event);
+        return delivery;
     }
 }
