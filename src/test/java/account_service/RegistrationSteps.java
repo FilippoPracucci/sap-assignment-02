@@ -37,7 +37,7 @@ public class RegistrationSteps {
     }
 
     @When("I create an account with a username {string} and a valid password {string}")
-    public void iCreateAnAccountWithAUniqueUsernameAndAValidPassword(final String username, final String pwd) {
+    public void iCreateAnAccountWithAUsernameAndAValidPassword(final String username, final String pwd) {
         assertThat(this.currentPage).isEqualTo("registration");
         this.userId = this.accountService.registerUser(username, pwd).getId().id();
         this.lastInfo = "Account created";
