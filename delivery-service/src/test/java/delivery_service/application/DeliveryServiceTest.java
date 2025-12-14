@@ -6,12 +6,14 @@ import delivery_service.domain.DeliveryId;
 import delivery_service.infrastructure.FileBasedDeliveryEventStore;
 import org.junit.jupiter.api.*;
 
+import java.io.File;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DeliveryServiceTest {
 
+    private static final String DELIVERY_EVENT_STORE_FILE_NAME = "delivery_event_store.json";
     private static final double WEIGHT = 5.0;
 
     private final Address startingPlace = new Address("via Roma", 50);
@@ -22,7 +24,7 @@ public class DeliveryServiceTest {
     @BeforeEach
     public void setUp() {
         this.deliveryService = new DeliveryServiceImpl();
-        this.deliveryService.bindDeliveryRepository(new FileBasedDeliveryEventStore());
+        this.deliveryService.bindDeliveryRepository(new FileBasedDeliveryEventStore(DELIVERY_EVENT_STORE_FILE_NAME));
         this.id = this.deliveryService.createNewDelivery(WEIGHT, this.startingPlace, this.destinationPlace,
                 Optional.empty());
     }
@@ -61,6 +63,13 @@ public class DeliveryServiceTest {
                     () -> this.deliveryService.getTrackingSession(trackingSession.getId()));
         } catch (final DeliveryNotFoundException | TrackingSessionNotFoundException e) {
             fail(e);
+        }
+    }
+
+    @AfterAll
+    public static void resetTestEnvironment() {
+        if (!new File(System.getProperty("user.dir") + File.separator + DELIVERY_EVENT_STORE_FILE_NAME).delete()) {
+            Assertions.fail("Event store file not deleted");
         }
     }
 }

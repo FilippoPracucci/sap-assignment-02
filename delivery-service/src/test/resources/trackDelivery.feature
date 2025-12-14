@@ -13,5 +13,5 @@ Feature: User tracks a delivery
     Given I am on delivery tracking page
     And I have not a delivery with id "delivery-100" in my list
     When I track the delivery with id "delivery-100"
-    Then I should see an error which says "Delivery does not exist"
+    Then I should see an error "Delivery does not exist"
     And I should not see the delivery state and the time left
