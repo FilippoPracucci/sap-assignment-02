@@ -2,6 +2,8 @@ package delivery_service;
 
 import delivery_service.application.DeliveryEventStore;
 import delivery_service.application.DeliveryServiceImpl;
+import delivery_service.domain.*;
+import delivery_service.infrastructure.DeliveryJsonConverter;
 import delivery_service.infrastructure.DeliveryServiceController;
 import delivery_service.infrastructure.FileBasedDeliveryEventStore;
 import delivery_service.infrastructure.Synchronizer;
@@ -16,6 +18,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.GregorianCalendar;
 
 public class SetupSteps {
 
@@ -41,19 +44,22 @@ public class SetupSteps {
             ex.printStackTrace();
         }
 
-        //registerAccount("userName", "Secret#123");
+        createDelivery(new DeliveryDetailImpl(
+                new DeliveryId("delivery-0"),
+                10.0,
+                new Address("via Emilia", 9),
+                new Address("via Veneto", 5),
+                GregorianCalendar.from(TimeConverter.getNowAsZonedDateTime().plusHours(1))
+        ));
     }
 
-    /*private static void registerAccount(final String userName, final String password) {
+    private static void createDelivery(final DeliveryDetail deliveryDetail) {
         try {
-            doPost(DELIVERIES_RESOURCE_PATH, new JsonObject(Map.of(
-                    "userName", userName,
-                    "password", password)
-            ));
+            doPost(DELIVERIES_RESOURCE_PATH, DeliveryJsonConverter.toJson(deliveryDetail));
         } catch (final Exception e) {
             e.printStackTrace();
         }
-    }*/
+    }
 
     protected static HttpResponse<String> doPost(final String uri, final JsonObject body) throws Exception {
         HttpClient client = HttpClient.newHttpClient();
