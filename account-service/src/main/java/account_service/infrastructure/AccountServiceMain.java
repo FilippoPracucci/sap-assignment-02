@@ -11,12 +11,13 @@ import io.vertx.core.Vertx;
 public class AccountServiceMain {
 
 	static final int ACCOUNT_SERVICE_PORT = 9000;
+	static final String DB_ACCOUNTS_FILE_NAME = "accounts.json";
 
 	public static void main(String[] args) {
 		
 		var service = new AccountServiceImpl();
 		
-		service.bindAccountRepository(new FileBasedAccountRepository());
+		service.bindAccountRepository(new FileBasedAccountRepository(DB_ACCOUNTS_FILE_NAME));
 		
 		var vertx = Vertx.vertx();
 		var server = new AccountServiceController(service, ACCOUNT_SERVICE_PORT);

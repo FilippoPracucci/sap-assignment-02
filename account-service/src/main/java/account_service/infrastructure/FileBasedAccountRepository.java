@@ -12,6 +12,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.HashMap;
@@ -29,11 +30,13 @@ public class FileBasedAccountRepository implements AccountRepository {
 	private static final String USER_PREFIX = "user-";
 
 	/* db file */
-	static final String DB_ACCOUNTS_PATH = "./account-service/accounts.json";
-	
+	static final String DB_ACCOUNTS_PATH = System.getProperty("user.dir") + File.separator;
+
+	private final String dbAccountsFile;
 	private final HashMap<UserId, Account> userAccounts;
 	
-	public FileBasedAccountRepository() {
+	public FileBasedAccountRepository(final String fileName) {
+		this.dbAccountsFile = DB_ACCOUNTS_PATH + fileName;
 		this.userAccounts = new HashMap<>();
 		initFromDB();
 	}
@@ -77,7 +80,7 @@ public class FileBasedAccountRepository implements AccountRepository {
 
 	private void initFromDB() {
 		try {
-			var accountsDB = new BufferedReader(new FileReader(DB_ACCOUNTS_PATH));
+			var accountsDB = new BufferedReader(new FileReader(dbAccountsFile));
 			var sb = new StringBuilder();
 			while (accountsDB.ready()) {
 				sb.append(accountsDB.readLine()).append("\n");
@@ -107,7 +110,7 @@ public class FileBasedAccountRepository implements AccountRepository {
 				obj.put("whenCreated", ac.getWhenCreated());
 				list.add(obj);
 			}
-			var usersDB = new FileWriter(DB_ACCOUNTS_PATH);
+			var usersDB = new FileWriter(dbAccountsFile);
 			usersDB.append(list.encodePrettily());
 			usersDB.flush();
 			usersDB.close();
