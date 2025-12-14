@@ -5,6 +5,7 @@ import delivery_service.domain.*;
 import io.vertx.core.json.JsonArray;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.HashMap;
@@ -19,11 +20,13 @@ public class FileBasedDeliveryEventStore implements DeliveryEventStore {
     private static final String DELIVERY_PREFIX = "delivery-";
 
     /* event store file */
-    static final String DELIVERY_EVENT_STORE_PATH = "./delivery-service/delivery_event_store.json";
+    static final String DELIVERY_EVENT_STORE_PATH = System.getProperty("user.dir") + File.separator;
 
+    private final String deliveryEventStoreFile;
     private final HashMap<Integer, DeliveryEvent> events;
 
-    public FileBasedDeliveryEventStore() {
+    public FileBasedDeliveryEventStore(final String fileName) {
+        this.deliveryEventStoreFile = DELIVERY_EVENT_STORE_PATH + fileName;
         this.events = new HashMap<>();
         this.initFromDB();
     }
@@ -46,7 +49,7 @@ public class FileBasedDeliveryEventStore implements DeliveryEventStore {
 
     private void initFromDB() {
         try {
-            var eventStore = new BufferedReader(new FileReader(DELIVERY_EVENT_STORE_PATH));
+            var eventStore = new BufferedReader(new FileReader(this.deliveryEventStoreFile));
             var sb = new StringBuilder();
             while (eventStore.ready()) {
                 sb.append(eventStore.readLine()).append("\n");
@@ -65,7 +68,7 @@ public class FileBasedDeliveryEventStore implements DeliveryEventStore {
             for (final Map.Entry<Integer, DeliveryEvent> entry: this.events.entrySet()) {
                 list.add(DeliveryJsonConverter.toJson(entry.getKey(), entry.getValue()));
             }
-            var eventStore = new FileWriter(DELIVERY_EVENT_STORE_PATH);
+            var eventStore = new FileWriter(this.deliveryEventStoreFile);
             eventStore.append(list.encodePrettily());
             eventStore.flush();
             eventStore.close();

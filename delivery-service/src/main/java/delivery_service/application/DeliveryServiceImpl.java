@@ -61,11 +61,6 @@ public class DeliveryServiceImpl implements DeliveryService, DeliveryObserver {
 				destinationPlace, expectedShippingMoment, List.of(this));
 		logger.info("create New Delivery " + delivery.getId().id());
 		this.deliveries.addDelivery(delivery);
-        /*try {
-            this.DeliveryRepository.addDelivery(delivery);
-        } catch (InvalidDeliveryIdException | DeliveryAlreadyPresentException e) {
-            throw new RuntimeException(e);
-        }*/
 		this.observers.forEach(obs -> {
 			obs.notifyNewDeliveryCreated();
 			delivery.addDeliveryObserver(obs);

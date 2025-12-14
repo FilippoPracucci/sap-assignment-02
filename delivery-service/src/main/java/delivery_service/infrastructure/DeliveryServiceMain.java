@@ -12,12 +12,14 @@ import java.util.logging.Logger;
 
 public class DeliveryServiceMain {
 
+	private static final String DELIVERY_EVENT_STORE_FILE_NAME = "delivery_event_store.json";
+
 	static final int DELIVERY_SERVICE_PORT = 9002;
 	static final int PROMETHEUS_SERVER_PORT = 9400;
 
 	public static void main(String[] args) {
 		final var deliveryService = new DeliveryServiceImpl();
-		deliveryService.bindDeliveryRepository(new FileBasedDeliveryEventStore());
+		deliveryService.bindDeliveryRepository(new FileBasedDeliveryEventStore(DELIVERY_EVENT_STORE_FILE_NAME));
 		try {
 			deliveryService.addObserver(new PrometheusDeliveryServiceObserver(PROMETHEUS_SERVER_PORT));
 		} catch (final ObservabilityMetricServerException ex) {
