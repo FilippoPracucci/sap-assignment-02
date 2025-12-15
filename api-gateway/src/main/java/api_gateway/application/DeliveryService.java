@@ -49,13 +49,4 @@ public interface DeliveryService {
 	 */
 	void stopTrackingDelivery(DeliveryId deliveryId, String trackingSessionId) throws DeliveryNotFoundException,
 			TrackingSessionNotFoundException, ServiceNotAvailableException;
-
-	/**
-	 *
-	 * Create an event channel to receive delivery events, asynchronously
-	 *
-	 * @param trackingSessionId
-	 * @param vertx
-	 */
-	void createAnEventChannel(String trackingSessionId, Vertx vertx);
 }

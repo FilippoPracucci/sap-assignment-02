@@ -10,7 +10,7 @@ import java.net.http.HttpResponse;
 import java.util.Optional;
 
 @Adapter
-public class DeliveryServiceProxy extends HTTPSyncBaseProxy implements DeliveryService {
+public class DeliveryServiceProxy extends HTTPSyncBaseProxy implements DeliveryServiceVertx {
 
     private final String wsAddress;
     private final int wsPort;

@@ -37,7 +37,7 @@ public class APIGatewayMain {
     public static void main(String[] args) {
         final AccountService accountService = new AccountServiceProxy(ACCOUNT_SERVICE_ADDRESS);
         final LobbyService lobbyService = new LobbyServiceProxy(LOBBY_SERVICE_ADDRESS);
-        final DeliveryService deliveryService = new DeliveryServiceProxy(DELIVERY_SERVICE_ADDRESS,
+        final DeliveryServiceVertx deliveryService = new DeliveryServiceProxy(DELIVERY_SERVICE_ADDRESS,
                 DELIVERY_SERVICE_WS_ADDRESS, DELIVERY_SERVICE_WS_PORT);
 
         var server = new APIGatewayController(accountService, lobbyService, deliveryService, BACKEND_PORT);

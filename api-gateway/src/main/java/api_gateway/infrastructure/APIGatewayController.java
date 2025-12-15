@@ -54,13 +54,13 @@ public class APIGatewayController extends VerticleBase  {
 	/* proxies to interact with the services */
 	private final AccountService accountService;
 	private final LobbyService lobbyService;
-	private final DeliveryService deliveryService;
+	private final DeliveryServiceVertx deliveryService;
 
 	/* observability */
 	private final List<ControllerObserver> observers;
 
 	public APIGatewayController(final AccountService accountService, final LobbyService lobbyService,
-								final DeliveryService deliveryService, final int port) {
+								final DeliveryServiceVertx deliveryService, final int port) {
 		this.port = port;
 		logger.setLevel(Level.INFO);
 		this.accountService = accountService;
