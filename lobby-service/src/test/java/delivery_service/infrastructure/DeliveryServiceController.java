@@ -1,0 +1,165 @@
+package delivery_service.infrastructure;
+
+import io.vertx.core.Future;
+import io.vertx.core.VerticleBase;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.StaticHandler;
+import lobby_service.application.DeliveryService;
+import lobby_service.application.TrackDeliveryFailedException;
+import lobby_service.domain.DeliveryId;
+import lobby_service.domain.TimeConverter;
+
+import java.util.Calendar;
+import java.util.Optional;
+import java.util.logging.Logger;
+
+/**
+*
+* Delivery Service controller
+*
+*/
+public class DeliveryServiceController extends VerticleBase  {
+
+	private final int port;
+	static Logger logger = Logger.getLogger("[Delivery Service Controller]");
+
+	static final String API_VERSION = "v1";
+	static final String DELIVERIES_RESOURCE_PATH = "/api/" + API_VERSION + "/deliveries";
+	static final String DELIVERY_RESOURCE_PATH =  DELIVERIES_RESOURCE_PATH +   "/:deliveryId";
+	static final String TRACK_RESOURCE_PATH =  DELIVERY_RESOURCE_PATH +   "/track";
+
+	/* Health check endpoint */
+	static final String HEALTH_CHECK_ENDPOINT = "/api/" + API_VERSION + "/health";
+	
+	/* Ref. to the application layer */
+	private final DeliveryService deliveryService;
+	
+	public DeliveryServiceController(final DeliveryService deliveryService, final int port) {
+		this.port = port;
+		this.deliveryService = deliveryService;
+	}
+
+	public Future<?> start() {
+		logger.info("Delivery Service initializing...");
+		HttpServer server = vertx.createHttpServer();
+				
+		Router router = Router.router(vertx);
+		router.route(HttpMethod.POST, DELIVERIES_RESOURCE_PATH).handler(this::createNewDelivery);
+		router.route(HttpMethod.POST, TRACK_RESOURCE_PATH).handler(this::trackDelivery);
+		router.route(HttpMethod.GET, HEALTH_CHECK_ENDPOINT).handler(this::healthCheckHandler);
+
+		/* static files */
+		router.route("/public/*").handler(StaticHandler.create());
+		
+		/* start the server */
+		var fut = server
+			.requestHandler(router)
+			.listen(this.port);
+		fut.onSuccess(res -> {
+			logger.info("Delivery Service ready - port: " + this.port);
+		});
+
+		return fut;
+	}
+
+	protected void healthCheckHandler(final RoutingContext context) {
+		logger.info("Health check request " + context.currentRoute().getPath());
+		final JsonObject reply = new JsonObject();
+		reply.put("status", "UP");
+		sendReply(context.response(), reply);
+	}
+
+	/**
+	 * 
+	 * Create a New Delivery - by users logged in (with a UserSession)
+	 * 
+	 * @param context
+	 */
+	protected void createNewDelivery(final RoutingContext context) {
+		logger.info("CreateNewDelivery request - " + context.currentRoute().getPath());
+		context.request().handler(buf -> {
+			final JsonObject deliveryDetailJson = buf.toJsonObject();
+			var reply = new JsonObject();
+			try {
+				final Optional<Calendar> expectedShippingMoment =
+						DeliveryJsonConverter.getExpectedShippingMoment(deliveryDetailJson);
+				if (expectedShippingMoment.isPresent() && TimeConverter.getZonedDateTime(expectedShippingMoment.get())
+						.isBefore(TimeConverter.getNowAsZonedDateTime())
+				) {
+					reply.put("result", "error");
+					reply.put("error", "past-shipping-moment");
+				} else if (expectedShippingMoment.isPresent()
+						&& TimeConverter.getZonedDateTime(expectedShippingMoment.get()).isAfter(
+                                        TimeConverter.getNowAsZonedDateTime().plusDays(14))
+				) {
+					reply.put("result", "error");
+					reply.put("error", "shipping-moment-too-far");
+				} else {
+					final DeliveryId deliveryId = this.deliveryService.createNewDelivery(
+							deliveryDetailJson.getNumber("weight").doubleValue(),
+							DeliveryJsonConverter.getAddress(deliveryDetailJson, "startingPlace"),
+							DeliveryJsonConverter.getAddress(deliveryDetailJson, "destinationPlace"),
+							expectedShippingMoment
+					);
+					reply.put("result", "ok");
+					reply.put("deliveryId", deliveryId.id());
+					reply.put("deliveryLink", DELIVERY_RESOURCE_PATH.replace(":deliveryId", deliveryId.id()));
+					reply.put("trackDeliveryLink", TRACK_RESOURCE_PATH.replace(":deliveryId", deliveryId.id()));
+				}
+				sendReply(context.response(), reply);
+			} catch (final Exception ex) {
+				logger.severe(ex.getMessage());
+				sendError(context.response());
+			}
+		});		
+	}
+
+	/**
+	 * 
+	 * Track a Delivery - by user logged in (with a UserSession)
+	 * 
+	 * It creates a TrackingSession
+	 * 
+	 * @param context
+	 */
+	protected void trackDelivery(final RoutingContext context) {
+		logger.info("TrackDelivery request - " + context.currentRoute().getPath());
+		context.request().endHandler(h -> {
+			final DeliveryId deliveryId = new DeliveryId(context.pathParam("deliveryId"));
+			logger.info("Track delivery " + deliveryId.id());
+			var reply = new JsonObject();
+			try {
+				final String trackingSessionId = this.deliveryService.trackDelivery(deliveryId);
+				reply.put("trackingSessionId", trackingSessionId);
+				reply.put("result", "ok");
+				sendReply(context.response(), reply);
+			} catch (final TrackDeliveryFailedException ex) {
+				reply.put("result", "error");
+				reply.put("error", ex.getMessage());
+				sendReply(context.response(), reply);
+			} catch (Exception ex1) {
+				sendError(context.response());
+			}
+		});
+	}
+
+	/* Aux methods */
+
+	private void sendReply(final HttpServerResponse response, final JsonObject reply) {
+		response.putHeader("content-type", "application/json");
+		response.end(reply.toString());
+	}
+	
+	private void sendError(final HttpServerResponse response) {
+		response.setStatusCode(500);
+		response.putHeader("content-type", "application/json");
+		response.end();
+	}
+
+
+}
