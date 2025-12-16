@@ -124,7 +124,7 @@ public class AccountServiceController extends VerticleBase {
 			sendReply(context.response(), reply);
 		} catch (AccountNotFoundException ex) {
 			reply.put("result", "error");
-			reply.put("error", "account-not-present");
+			reply.put("error", ex.getMessage());
 			sendReply(context.response(), reply);
 		} catch (Exception ex1) {
 			sendError(context.response());

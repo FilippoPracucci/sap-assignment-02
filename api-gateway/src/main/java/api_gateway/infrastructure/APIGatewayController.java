@@ -172,7 +172,7 @@ public class APIGatewayController extends VerticleBase  {
 			sendReply(context.response(), reply);
 		}).onFailure((f) -> {
 			reply.put("result", "error");
-			reply.put("error", "account-not-present");
+			reply.put("error", f.getMessage());
 			sendReply(context.response(), reply);
 		});
 	}
