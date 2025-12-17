@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -123,32 +125,29 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void createNewAccount(final RoutingContext context) {
 		logger.log(Level.INFO, "create a new account");
-		this.notifyNewRESTRequest();
-		context.request().handler(buf -> {
-			JsonObject userInfo = buf.toJsonObject();
-			logger.log(Level.INFO, "Payload: " + userInfo);
-			var userName = userInfo.getString("userName");
-			var password = userInfo.getString("password");
-
-			var reply = new JsonObject();
-			
-			/* 
-			 * we cannot block the event loop, so - since proxies are synchronous,
-			 * we need to delegate the call to a background thread
-			 */
-			this.vertx.executeBlocking(() -> this.accountService.registerUser(userName, password))
-					.onSuccess((account) -> {
-				reply.put("result", "ok");
-				reply.put("accountId", account.getId().id());
-				reply.put("loginLink", LOGIN_RESOURCE_PATH.replace(":accountId", account.getId().id()));
-				reply.put("accountLink", ACCOUNT_RESOURCE_PATH.replace(":accountId", account.getId().id()));
-				sendReply(context.response(), reply);
-			}).onFailure((f) -> {
-				reply.put("result", "error");
-				reply.put("error", f.getMessage());
-				sendReply(context.response(), reply);
-			});
-		});
+		this.handleRequest(ctx -> ctx.request().handler(buf -> {
+            JsonObject userInfo = buf.toJsonObject();
+            logger.log(Level.INFO, "Payload: " + userInfo);
+            var userName = userInfo.getString("userName");
+            var password = userInfo.getString("password");
+            var reply = new JsonObject();
+            /*
+             * we cannot block the event loop, so - since proxies are synchronous,
+             * we need to delegate the call to a background thread
+             */
+            this.vertx.executeBlocking(() -> this.accountService.registerUser(userName, password))
+                    .onSuccess((account) -> {
+                            reply.put("result", "ok");
+                            reply.put("accountId", account.getId().id());
+                            reply.put("loginLink", LOGIN_RESOURCE_PATH.replace(":accountId", account.getId().id()));
+                            reply.put("accountLink", ACCOUNT_RESOURCE_PATH.replace(":accountId", account.getId().id()));
+                            sendReply(ctx.response(), reply);
+                    }).onFailure((f) -> {
+                            reply.put("result", "error");
+                            reply.put("error", f.getMessage());
+                            sendReply(ctx.response(), reply);
+                    });
+        }), context);
 	}
 
 	/**
@@ -159,22 +158,24 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void getAccountInfo(final RoutingContext context) {
 		logger.log(Level.INFO, "get account info");
-		this.notifyNewRESTRequest();
-		var userId = context.pathParam("accountId");
-		var reply = new JsonObject();
-		this.vertx.executeBlocking(() -> this.accountService.getAccountInfo(new UserId(userId))).onSuccess((account) -> {
-			reply.put("result", "ok");
-			var accJson = new JsonObject();
-			accJson.put("userName", account.getUserName());
-			accJson.put("password", account.getPassword());
-			accJson.put("whenCreated", account.getWhenCreated());
-			reply.put("accountInfo", accJson);			
-			sendReply(context.response(), reply);
-		}).onFailure((f) -> {
-			reply.put("result", "error");
-			reply.put("error", f.getMessage());
-			sendReply(context.response(), reply);
-		});
+		this.handleRequest(ctx -> {
+			var userId = ctx.pathParam("accountId");
+			var reply = new JsonObject();
+			this.vertx.executeBlocking(() -> this.accountService.getAccountInfo(new UserId(userId)))
+					.onSuccess((account) -> {
+						reply.put("result", "ok");
+						var accJson = new JsonObject();
+						accJson.put("userName", account.getUserName());
+						accJson.put("password", account.getPassword());
+						accJson.put("whenCreated", account.getWhenCreated());
+						reply.put("accountInfo", accJson);
+						sendReply(ctx.response(), reply);
+					}).onFailure((f) -> {
+						reply.put("result", "error");
+						reply.put("error", f.getMessage());
+						sendReply(ctx.response(), reply);
+					});
+		}, context);
 	}
 	
 	/**
@@ -187,11 +188,10 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void login(final RoutingContext context) {
 		logger.log(Level.INFO, "Login request");
-		this.notifyNewRESTRequest();
-		context.request().handler(buf -> {
+		this.handleRequest(ctx -> ctx.request().handler(buf -> {
 			JsonObject userInfo = buf.toJsonObject();
 			logger.log(Level.INFO, "Payload: " + userInfo);
-			String userId = context.pathParam("accountId");
+			String userId = ctx.pathParam("accountId");
 			String password = userInfo.getString("password");
 			var reply = new JsonObject();
 			this.vertx.executeBlocking(() -> this.lobbyService.login(new UserId(userId), password))
@@ -203,13 +203,13 @@ public class APIGatewayController extends VerticleBase  {
 				reply.put("sessionLink", USER_SESSIONS_RESOURCE_PATH + "/" + userSessionId);
 				reply.put("createDeliveryLink", createPath);
 				reply.put("trackDeliveryLink", trackPath);
-				sendReply(context.response(), reply);
+				sendReply(ctx.response(), reply);
 			}).onFailure((f) -> {
 				reply.put("result", "login-failed");
 				reply.put("error", f.getMessage());
-				sendReply(context.response(), reply);
+				sendReply(ctx.response(), reply);
 			});			
-		});
+		}), context);
 	}
 	
 	
@@ -221,10 +221,9 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void createNewDelivery(final RoutingContext context) {
 		logger.log(Level.INFO, "Create delivery request - " + context.currentRoute().getPath());
-		this.notifyNewRESTRequest();
-		context.request().handler(buf -> {
+		this.handleRequest(ctx -> ctx.request().handler(buf -> {
 			final JsonObject deliveryDetailJson = buf.toJsonObject();
-			String userSessionId = context.pathParam("sessionId");
+			String userSessionId = ctx.pathParam("sessionId");
 			var reply = new JsonObject();
 			final Optional<Calendar> expectedShippingMoment = DeliveryJsonConverter.getExpectedShippingMoment(deliveryDetailJson);
 			vertx.executeBlocking(() -> this.lobbyService.createNewDelivery(
@@ -239,13 +238,13 @@ public class APIGatewayController extends VerticleBase  {
 				reply.put("deliveryLink", DELIVERIES_RESOURCE_PATH + "/" + deliveryId.id());
 				reply.put("trackDeliveryLink",
 						TRACK_DELIVERY_RESOURCE_PATH.replace(":sessionId", userSessionId));
-				sendReply(context.response(), reply);
+				sendReply(ctx.response(), reply);
 			}).onFailure((f) -> {
 				reply.put("result", "error");
 				reply.put("error", f.getMessage());
-				sendReply(context.response(), reply);
+				sendReply(ctx.response(), reply);
 			});
-		});		
+		}), context);
 	}
 
 	/**
@@ -256,9 +255,8 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void trackDelivery(final RoutingContext context) {
 		logger.log(Level.INFO, "Track delivery request - " + context.currentRoute().getPath());
-		this.notifyNewRESTRequest();
-		context.request().handler(buf -> {
-			final String userSessionId = context.pathParam("sessionId");
+		this.handleRequest(ctx -> ctx.request().handler(buf -> {
+			final String userSessionId = ctx.pathParam("sessionId");
 			final String deliveryId = buf.toJsonObject().getString("deliveryId");
 			final JsonObject reply = new JsonObject();
 			vertx.executeBlocking(() -> this.lobbyService.trackDelivery(userSessionId, new DeliveryId(deliveryId)))
@@ -266,13 +264,13 @@ public class APIGatewayController extends VerticleBase  {
 				reply.put("result", "ok");
 				reply.put("trackingSessionId", trackingSessionId);
 				reply.put("trackingSessionLink", DELIVERIES_RESOURCE_PATH + "/" + deliveryId + "/" + trackingSessionId);
-				sendReply(context.response(), reply);
+				sendReply(ctx.response(), reply);
 			}).onFailure((f) -> {
 				reply.put("result", "error");
 				reply.put("error", f.getMessage());
-				sendReply(context.response(), reply);
+				sendReply(ctx.response(), reply);
 			});			
-		});		
+		}), context);
 	}	
 	
 	/**
@@ -283,21 +281,20 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void getDeliveryDetail(final RoutingContext context) {
 		logger.log(Level.INFO, "get delivery detail");
-		this.notifyNewRESTRequest();
-		context.request().endHandler(h -> {
-			final DeliveryId deliveryId = new DeliveryId(context.pathParam("deliveryId"));
+		this.handleRequest(ctx -> ctx.request().endHandler(h -> {
+			final DeliveryId deliveryId = new DeliveryId(ctx.pathParam("deliveryId"));
 			var reply = new JsonObject();
 			this.vertx.executeBlocking(() -> this.deliveryService.getDeliveryDetail(deliveryId))
 					.onSuccess((deliveryDetail) -> {
 				reply.put("result", "ok");
 				reply.put("deliveryDetail", DeliveryJsonConverter.toJson(deliveryDetail));
-				sendReply(context.response(), reply);
+				sendReply(ctx.response(), reply);
 			}).onFailure((f) -> {
 				reply.put("result", "error");
 				reply.put("error", f.getMessage());
-				sendReply(context.response(), reply);
+				sendReply(ctx.response(), reply);
 			});
-		});
+		}), context);
 	}
 
 	/**
@@ -308,11 +305,10 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void getDeliveryStatus(final RoutingContext context) {
 		logger.log(Level.INFO, "GetDeliveryStatus request - " + context.currentRoute().getPath());
-		this.notifyNewRESTRequest();
-		context.request().endHandler(h -> {
+		this.handleRequest(ctx -> ctx.request().endHandler(h -> {
 			final JsonObject reply = new JsonObject();
-			final DeliveryId deliveryId = new DeliveryId(context.pathParam("deliveryId"));
-			final String trackingSessionId = context.pathParam("trackingSessionId");
+			final DeliveryId deliveryId = new DeliveryId(ctx.pathParam("deliveryId"));
+			final String trackingSessionId = ctx.pathParam("trackingSessionId");
 			this.vertx.executeBlocking(() -> this.deliveryService.getDeliveryStatus(deliveryId, trackingSessionId))
 					.onSuccess((deliveryStatus) -> {
 				reply.put("result", "ok");
@@ -323,19 +319,19 @@ public class APIGatewayController extends VerticleBase  {
 					deliveryJson.put("timeLeft", deliveryStatus.getTimeLeft().get().days() + " days left");
 				}
 				reply.put("deliveryStatus", deliveryJson);
-				sendReply(context.response(), reply);
+				sendReply(ctx.response(), reply);
 			}).onFailure(f -> {
 				if (f instanceof TrackingSessionNotFoundException) {
 					reply.put("result", "error");
 					reply.put("error", "tracking-session-not-present");
-					sendReply(context.response(), reply);
+					sendReply(ctx.response(), reply);
 				} else {
 					reply.put("result", "error");
 					reply.put("error", f.getMessage());
-					sendReply(context.response(), reply);
+					sendReply(ctx.response(), reply);
 				}
 			});
-		});
+		}), context);
 	}
 
 	/**
@@ -346,10 +342,9 @@ public class APIGatewayController extends VerticleBase  {
 	 */
 	protected void stopTrackingDelivery(final RoutingContext context) {
 		logger.log(Level.INFO, "Stop tracking delivery request - " + context.currentRoute().getPath());
-		this.notifyNewRESTRequest();
-		context.request().endHandler(h -> {
-			final DeliveryId deliveryId = new DeliveryId(context.pathParam("deliveryId"));
-			final String trackingSessionId = context.pathParam("trackingSessionId");
+		this.handleRequest(ctx -> ctx.request().endHandler(h -> {
+			final DeliveryId deliveryId = new DeliveryId(ctx.pathParam("deliveryId"));
+			final String trackingSessionId = ctx.pathParam("trackingSessionId");
 			logger.log(Level.INFO, "Stop tracking delivery " + deliveryId.id());
 			var reply = new JsonObject();
 			this.vertx.executeBlocking(() -> {
@@ -357,13 +352,13 @@ public class APIGatewayController extends VerticleBase  {
 				return null;
 			}).onSuccess((x) -> {
 				reply.put("result", "ok");
-				sendReply(context.response(), reply);
+				sendReply(ctx.response(), reply);
 			}).onFailure(f -> {
 				reply.put("result", "error");
 				reply.put("error", f.getMessage());
-				sendReply(context.response(), reply);
+				sendReply(ctx.response(), reply);
 			});
-		});
+		}), context);
 	}
 
 	/**
@@ -408,10 +403,15 @@ public class APIGatewayController extends VerticleBase  {
 		});
 	}
 
-	private void notifyNewRESTRequest() {
-		this.observers.forEach(ControllerObserver::notifyNewRESTRequest);
+	private void handleRequest(final Consumer<RoutingContext> handleContext, final RoutingContext context) {
+		final long initialTime = System.nanoTime();
+		handleContext.accept(context);
+		this.notifyNewRESTRequest(System.nanoTime() - initialTime);
 	}
 
+	private void notifyNewRESTRequest(final long responseTimeInNanoseconds) {
+		this.observers.forEach(obs -> obs.notifyNewRESTRequest(TimeUnit.NANOSECONDS.toMillis(responseTimeInNanoseconds)));
+	}
 	
 	/* Aux methods */
 

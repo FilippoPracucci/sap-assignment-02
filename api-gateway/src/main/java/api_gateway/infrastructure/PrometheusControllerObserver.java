@@ -11,6 +11,7 @@ import java.io.IOException;
 public class PrometheusControllerObserver implements ControllerObserver {
 
 	private final Counter nTotalNumberOfRESTRequests;
+	private final Counter totalRequestResponseTime;
 
     public PrometheusControllerObserver(final int port) throws ObservabilityMetricServerException {
 		JvmMetrics.builder().register();
@@ -18,6 +19,11 @@ public class PrometheusControllerObserver implements ControllerObserver {
 		this.nTotalNumberOfRESTRequests = Counter.builder()
 				.name("api_gateway_num_rest_requests_total")
 				.help("Total number of REST requests received")
+				.register();
+
+		this.totalRequestResponseTime = Counter.builder()
+				.name("api_gateway_request_response_time_ms_total")
+				.help("Total request response time in milliseconds")
 				.register();
 
 		try {
@@ -30,7 +36,8 @@ public class PrometheusControllerObserver implements ControllerObserver {
 	}
 
 	@Override
-	public void notifyNewRESTRequest() {
+	public void notifyNewRESTRequest(final long responseTimeInMillis) {
 		this.nTotalNumberOfRESTRequests.inc();
+		this.totalRequestResponseTime.inc(responseTimeInMillis);
 	}
 }
