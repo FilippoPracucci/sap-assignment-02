@@ -137,15 +137,19 @@ public class APIGatewayController extends VerticleBase  {
              */
             this.vertx.executeBlocking(() -> this.accountService.registerUser(userName, password))
                     .onSuccess((account) -> {
-                            reply.put("result", "ok");
-                            reply.put("accountId", account.getId().id());
-                            reply.put("loginLink", LOGIN_RESOURCE_PATH.replace(":accountId", account.getId().id()));
-                            reply.put("accountLink", ACCOUNT_RESOURCE_PATH.replace(":accountId", account.getId().id()));
-                            sendReply(ctx.response(), reply);
+						reply.put("result", "ok");
+						reply.put("accountId", account.getId().id());
+						reply.put("loginLink", LOGIN_RESOURCE_PATH.replace(":accountId", account.getId().id()));
+						reply.put("accountLink", ACCOUNT_RESOURCE_PATH.replace(":accountId", account.getId().id()));
+						sendReply(ctx.response(), reply);
+						this.notifyAccountCircuitStatus(false);
                     }).onFailure((f) -> {
-                            reply.put("result", "error");
-                            reply.put("error", f.getMessage());
-                            sendReply(ctx.response(), reply);
+						if (f instanceof ServiceNotAvailableException) {
+							this.notifyAccountCircuitStatus(((ServiceNotAvailableException) f).isCircuitOpen());
+						}
+						reply.put("result", "error");
+						reply.put("error", f.getMessage());
+						sendReply(ctx.response(), reply);
                     });
         }), context);
 	}
@@ -170,7 +174,11 @@ public class APIGatewayController extends VerticleBase  {
 						accJson.put("whenCreated", account.getWhenCreated());
 						reply.put("accountInfo", accJson);
 						sendReply(ctx.response(), reply);
+						this.notifyAccountCircuitStatus(false);
 					}).onFailure((f) -> {
+						if (f instanceof ServiceNotAvailableException) {
+							this.notifyAccountCircuitStatus(((ServiceNotAvailableException) f).isCircuitOpen());
+						}
 						reply.put("result", "error");
 						reply.put("error", f.getMessage());
 						sendReply(ctx.response(), reply);
@@ -411,6 +419,10 @@ public class APIGatewayController extends VerticleBase  {
 
 	private void notifyNewRESTRequest(final long responseTimeInNanoseconds) {
 		this.observers.forEach(obs -> obs.notifyNewRESTRequest(TimeUnit.NANOSECONDS.toMillis(responseTimeInNanoseconds)));
+	}
+
+	private void notifyAccountCircuitStatus(final boolean isCircuitOpen) {
+		this.observers.forEach(obs -> obs.notifyAccountCircuitStatus(isCircuitOpen));
 	}
 	
 	/* Aux methods */

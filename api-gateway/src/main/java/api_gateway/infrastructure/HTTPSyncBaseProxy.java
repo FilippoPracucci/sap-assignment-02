@@ -38,7 +38,7 @@ abstract public class HTTPSyncBaseProxy {
 	private HttpResponse<String> doRequest(final String uri, final boolean isPost, final Optional<JsonObject> body)
 			throws ServiceNotAvailableException {
 		if (!this.isCircuitClose) {
-			throw new ServiceNotAvailableException();
+			throw new ServiceNotAvailableException(true);
 		}
 		HttpClient client = HttpClient.newHttpClient();
 		HttpRequest request;
