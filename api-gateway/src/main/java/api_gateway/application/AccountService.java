@@ -11,9 +11,9 @@ public interface AccountService {
      * 
      * Register a new user.
      * 
-     * @param userName
-     * @param password
-     * @return
+     * @param userName the userName
+     * @param password the password
+     * @return the account created.
      */
 	Account registerUser(String userName, String password) throws ServiceNotAvailableException;
 
@@ -21,8 +21,8 @@ public interface AccountService {
      * 
      * Get account info.
      * 
-     * @param userId
-     * @return
+     * @param userId the user id
+     * @return the account info.
      * @throws AccountNotFoundException
      */
 	Account getAccountInfo(UserId userId) throws AccountNotFoundException, ServiceNotAvailableException;

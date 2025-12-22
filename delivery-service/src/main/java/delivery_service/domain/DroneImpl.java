@@ -7,7 +7,7 @@ import java.util.Optional;
 class DroneImpl implements Drone, Runnable {
 
     private static final int DURATION_MULTIPLIER = 5;
-    private static final int HOUR_IN_MILLISECONDS = 3_600; // TODO change in 3_600_000
+    private static final int HOUR_IN_MILLISECONDS = 3_600_000;
     private static final int HOURS_IN_A_DAY = 24;
     private static final int PERIOD_IN_HOURS = 1;
 

@@ -6,10 +6,10 @@ import api_gateway.application.*;
 import java.util.logging.Logger;
 
 /**
- *
- * API Gateway for the Shipping in the Air case study
- *
+ * @author Bedeschi Federica   federica.bedeschi4@studio.unibo.it
+ * @author Pracucci Filippo    filippo.pracucci@studio.unibo.it
  */
+
 public class APIGatewayMain {
 
     static final int BACKEND_PORT = 8080;

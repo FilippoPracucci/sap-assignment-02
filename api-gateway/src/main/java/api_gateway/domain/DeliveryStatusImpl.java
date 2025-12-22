@@ -5,8 +5,8 @@ import java.util.Optional;
 public class DeliveryStatusImpl implements DeliveryStatus {
 
     private final DeliveryId id;
-    private DeliveryState state;
-    private Optional<DeliveryTime> timeLeft;
+    private final DeliveryState state;
+    private final Optional<DeliveryTime> timeLeft;
 
     public DeliveryStatusImpl(final DeliveryId id, final DeliveryState state, final Optional<DeliveryTime> timeLeft) {
         this.id = id;

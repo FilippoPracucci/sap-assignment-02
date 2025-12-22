@@ -8,7 +8,6 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 /**

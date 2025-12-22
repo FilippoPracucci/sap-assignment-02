@@ -1,14 +1,9 @@
 package delivery_service.application;
 
 import common.hexagonal.InBoundPort;
-import delivery_service.application.DeliveryNotFoundException;
-import delivery_service.application.TrackingSession;
-import delivery_service.application.TrackingSessionEventObserver;
-import delivery_service.application.TrackingSessionNotFoundException;
 import delivery_service.domain.*;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Optional;
 
 /**
@@ -23,8 +18,8 @@ public interface DeliveryService {
      * 
      * Get delivery detail.
      * 
-     * @param deliveryId
-     * @return
+     * @param deliveryId the delivery id
+     * @return the delivery details
      * @throws DeliveryNotFoundException
      */
 	DeliveryDetail getDeliveryDetail(DeliveryId deliveryId) throws DeliveryNotFoundException;
@@ -33,8 +28,8 @@ public interface DeliveryService {
 	 *
 	 * Get delivery detail.
 	 *
-	 * @param deliveryId
-	 * @return
+	 * @param deliveryId the delivery id
+	 * @return the delivery status
 	 * @throws DeliveryNotFoundException
 	 * @throws TrackingSessionNotFoundException
 	 */
@@ -45,14 +40,14 @@ public interface DeliveryService {
 	 * 
 	 * Retrieve an existing tracking session.
 	 * 
-	 * @param trackingSessionId
-	 * @return
+	 * @param trackingSessionId the tracking session id
+	 * @return the tracking session
 	 */
 	TrackingSession getTrackingSession(String trackingSessionId) throws TrackingSessionNotFoundException;
 	
 	/**
 	 * 
-	 * Create a delivery -- called by a UserSession (logged in user)
+	 * Create a delivery -- called by a UserSession (logged-in user)
      *
 	 * @return the id of the delivery
 	 */
@@ -63,7 +58,7 @@ public interface DeliveryService {
 	
 	/**
 	 * 
-	 * Track a delivery -- called by a UserSession (logged in user), creates a new TrackingSession
+	 * Track a delivery -- called by a UserSession (logged-in user), creates a new TrackingSession
 	 *
 	 * @param deliveryId -- id of the delivery to be tracked
 	 * @param observer -- observer of the events
@@ -75,7 +70,7 @@ public interface DeliveryService {
 
 	/**
 	 *
-	 * Stop tracking a delivery -- called by a UserSession (logged in user), delete the TrackingSession with the
+	 * Stop tracking a delivery -- called by a UserSession (logged-in user), delete the TrackingSession with the
 	 * trackingSessionId given
 	 *
 	 * @param deliveryId -- id of the delivery to be tracked

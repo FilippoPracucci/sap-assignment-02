@@ -45,7 +45,7 @@ public class CircuitBreakerTest extends Setup {
     private Thread createThreadDoingPostRequest() {
         return Thread.ofVirtual().start(() -> {
             try {
-                var response = doPost(API_GATEWAY_URI + ACCOUNTS_RESOURCE_PATH, new JsonObject(Map.of(
+                doPost(API_GATEWAY_URI + ACCOUNTS_RESOURCE_PATH, new JsonObject(Map.of(
                         "userName", "name",
                         "password", "1234"))
                 );

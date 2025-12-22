@@ -76,7 +76,7 @@ public class APIGatewayController extends VerticleBase  {
 	}
 
 	public Future<?> start() {
-		logger.log(Level.INFO, "API Gateway initializing...");
+		logger.info("API Gateway initializing...");
 		HttpServer server = vertx.createHttpServer();
 
 		/* REST API routes */
@@ -103,7 +103,7 @@ public class APIGatewayController extends VerticleBase  {
 		var fut = server
 			.requestHandler(router)
 			.listen(port);
-		fut.onSuccess(res -> logger.log(Level.INFO, "API Gateway ready - port: " + this.port));
+		fut.onSuccess(res -> logger.info("API Gateway ready - port: " + this.port));
 		return fut;
 	}
 
@@ -124,17 +124,13 @@ public class APIGatewayController extends VerticleBase  {
 	 * @param context
 	 */
 	protected void createNewAccount(final RoutingContext context) {
-		logger.log(Level.INFO, "create a new account");
+		logger.info("create a new account");
 		this.handleRequest(ctx -> ctx.request().handler(buf -> {
             JsonObject userInfo = buf.toJsonObject();
-            logger.log(Level.INFO, "Payload: " + userInfo);
+            logger.info("Payload: " + userInfo);
             var userName = userInfo.getString("userName");
             var password = userInfo.getString("password");
             var reply = new JsonObject();
-            /*
-             * we cannot block the event loop, so - since proxies are synchronous,
-             * we need to delegate the call to a background thread
-             */
             this.vertx.executeBlocking(() -> this.accountService.registerUser(userName, password))
                     .onSuccess((account) -> {
 						reply.put("result", "ok");
@@ -161,7 +157,7 @@ public class APIGatewayController extends VerticleBase  {
 	 * @param context
 	 */
 	protected void getAccountInfo(final RoutingContext context) {
-		logger.log(Level.INFO, "get account info");
+		logger.info("get account info");
 		this.handleRequest(ctx -> {
 			var userId = ctx.pathParam("accountId");
 			var reply = new JsonObject();
@@ -195,10 +191,10 @@ public class APIGatewayController extends VerticleBase  {
 	 * @param context
 	 */
 	protected void login(final RoutingContext context) {
-		logger.log(Level.INFO, "Login request");
+		logger.info("Login request");
 		this.handleRequest(ctx -> ctx.request().handler(buf -> {
 			JsonObject userInfo = buf.toJsonObject();
-			logger.log(Level.INFO, "Payload: " + userInfo);
+			logger.info("Payload: " + userInfo);
 			String userId = ctx.pathParam("accountId");
 			String password = userInfo.getString("password");
 			var reply = new JsonObject();
@@ -228,7 +224,7 @@ public class APIGatewayController extends VerticleBase  {
 	 * @param context
 	 */
 	protected void createNewDelivery(final RoutingContext context) {
-		logger.log(Level.INFO, "Create delivery request - " + context.currentRoute().getPath());
+		logger.info("Create delivery request - " + context.currentRoute().getPath());
 		this.handleRequest(ctx -> ctx.request().handler(buf -> {
 			final JsonObject deliveryDetailJson = buf.toJsonObject();
 			String userSessionId = ctx.pathParam("sessionId");
@@ -262,7 +258,7 @@ public class APIGatewayController extends VerticleBase  {
 	 * @param context
 	 */
 	protected void trackDelivery(final RoutingContext context) {
-		logger.log(Level.INFO, "Track delivery request - " + context.currentRoute().getPath());
+		logger.info("Track delivery request - " + context.currentRoute().getPath());
 		this.handleRequest(ctx -> ctx.request().handler(buf -> {
 			final String userSessionId = ctx.pathParam("sessionId");
 			final String deliveryId = buf.toJsonObject().getString("deliveryId");
@@ -288,7 +284,7 @@ public class APIGatewayController extends VerticleBase  {
 	 * @param context
 	 */
 	protected void getDeliveryDetail(final RoutingContext context) {
-		logger.log(Level.INFO, "get delivery detail");
+		logger.info("get delivery detail");
 		this.handleRequest(ctx -> ctx.request().endHandler(h -> {
 			final DeliveryId deliveryId = new DeliveryId(ctx.pathParam("deliveryId"));
 			var reply = new JsonObject();
@@ -312,7 +308,7 @@ public class APIGatewayController extends VerticleBase  {
 	 * @param context
 	 */
 	protected void getDeliveryStatus(final RoutingContext context) {
-		logger.log(Level.INFO, "GetDeliveryStatus request - " + context.currentRoute().getPath());
+		logger.info("GetDeliveryStatus request - " + context.currentRoute().getPath());
 		this.handleRequest(ctx -> ctx.request().endHandler(h -> {
 			final JsonObject reply = new JsonObject();
 			final DeliveryId deliveryId = new DeliveryId(ctx.pathParam("deliveryId"));
@@ -349,11 +345,11 @@ public class APIGatewayController extends VerticleBase  {
 	 * @param context
 	 */
 	protected void stopTrackingDelivery(final RoutingContext context) {
-		logger.log(Level.INFO, "Stop tracking delivery request - " + context.currentRoute().getPath());
+		logger.info("Stop tracking delivery request - " + context.currentRoute().getPath());
 		this.handleRequest(ctx -> ctx.request().endHandler(h -> {
 			final DeliveryId deliveryId = new DeliveryId(ctx.pathParam("deliveryId"));
 			final String trackingSessionId = ctx.pathParam("trackingSessionId");
-			logger.log(Level.INFO, "Stop tracking delivery " + deliveryId.id());
+			logger.info("Stop tracking delivery " + deliveryId.id());
 			var reply = new JsonObject();
 			this.vertx.executeBlocking(() -> {
 				this.deliveryService.stopTrackingDelivery(deliveryId, trackingSessionId);
@@ -379,7 +375,7 @@ public class APIGatewayController extends VerticleBase  {
 	protected void handleEventSubscription(final HttpServer server, final String path) {
 		server.webSocketHandler(webSocket -> {
 			if (webSocket.path().equals(path)) {
-				logger.log(Level.INFO, "New subscription accepted.");
+				logger.info("New subscription accepted.");
 
 				/*
 				 *
@@ -388,7 +384,7 @@ public class APIGatewayController extends VerticleBase  {
 				 *
 				 */
 				webSocket.textMessageHandler(openMsg -> {
-					logger.log(Level.INFO, "For delivery: " + openMsg);
+					logger.info("For delivery: " + openMsg);
 					JsonObject obj = new JsonObject(openMsg);
 					final String trackingSessionId = obj.getString("trackingSessionId");
 

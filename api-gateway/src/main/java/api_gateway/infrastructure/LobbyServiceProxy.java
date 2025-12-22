@@ -3,7 +3,6 @@ package api_gateway.infrastructure;
 import java.net.http.HttpResponse;
 import java.util.Calendar;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 import api_gateway.application.*;
 import api_gateway.domain.Address;

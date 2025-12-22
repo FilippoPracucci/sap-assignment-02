@@ -18,7 +18,7 @@ public interface TrackingSessionEventObserver {
 	 * 
 	 * This occurs when the observer is ready to receive the events
 	 * 
-	 * @param trackingSessionId
+	 * @param trackingSessionId the tracking session id
 	 */
 	void enableEventNotification(String trackingSessionId);
 
@@ -26,7 +26,7 @@ public interface TrackingSessionEventObserver {
 	 *
 	 * Notify that the delivery has been shipped
 	 *
-	 * @param trackingSessionId
+	 * @param trackingSessionId the tracking session id
 	 */
 	void shipped(String trackingSessionId);
 
@@ -34,7 +34,7 @@ public interface TrackingSessionEventObserver {
 	 *
 	 * Notify that the delivery has been delivered
 	 *
-	 * @param trackingSessionId
+	 * @param trackingSessionId the tracking session id
 	 */
 	void delivered(String trackingSessionId);
 
@@ -42,7 +42,7 @@ public interface TrackingSessionEventObserver {
 	 *
 	 * Notify that time elapsed while delivering
 	 *
-	 * @param trackingSessionId
+	 * @param trackingSessionId the tracking session id
 	 */
 	void timeElapsed(String trackingSessionId, DeliveryTime timeElapsed);
 }

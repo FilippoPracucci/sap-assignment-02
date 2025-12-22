@@ -5,11 +5,8 @@ import delivery_service.domain.Delivery;
 import delivery_service.domain.DeliveryId;
 
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 public class Deliveries implements Repository {
-	static Logger logger = Logger.getLogger("[DeliveriesRepo]");
-
 	private final HashMap<DeliveryId, Delivery> deliveries;
 
 	public Deliveries() {

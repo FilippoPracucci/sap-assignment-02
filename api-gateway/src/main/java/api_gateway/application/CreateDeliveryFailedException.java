@@ -6,6 +6,4 @@ public class CreateDeliveryFailedException extends Exception {
         super(message);
     }
 
-    public CreateDeliveryFailedException() {
-    }
 }

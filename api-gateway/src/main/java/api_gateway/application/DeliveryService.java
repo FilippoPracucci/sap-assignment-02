@@ -4,7 +4,6 @@ import api_gateway.domain.DeliveryDetail;
 import api_gateway.domain.DeliveryId;
 import api_gateway.domain.DeliveryStatus;
 import common.hexagonal.OutBoundPort;
-import io.vertx.core.Vertx;
 
 /**
  * 
@@ -18,8 +17,8 @@ public interface DeliveryService {
      * 
      * Get delivery detail.
      * 
-     * @param deliveryId
-     * @return
+     * @param deliveryId the delivery id
+     * @return the delivery detail
      * @throws DeliveryNotFoundException
      */
 	DeliveryDetail getDeliveryDetail(DeliveryId deliveryId) throws DeliveryNotFoundException,
@@ -29,8 +28,8 @@ public interface DeliveryService {
 	 *
 	 * Get delivery detail.
 	 *
-	 * @param deliveryId
-	 * @return
+	 * @param deliveryId the delivery id
+	 * @return the delivery status
 	 * @throws DeliveryNotFoundException
 	 * @throws TrackingSessionNotFoundException
 	 */
@@ -39,7 +38,7 @@ public interface DeliveryService {
 
 	/**
 	 *
-	 * Stop tracking a delivery -- called by a UserSession (logged in user), delete the TrackingSession with the
+	 * Stop tracking a delivery -- called by a UserSession (logged-in user), delete the TrackingSession with the
 	 * trackingSessionId given
 	 *
 	 * @param deliveryId -- id of the delivery to be tracked

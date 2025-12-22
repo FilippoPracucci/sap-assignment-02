@@ -3,7 +3,6 @@ package delivery_service.application;
 import common.ddd.Repository;
 
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 /**
  * 
@@ -11,8 +10,6 @@ import java.util.logging.Logger;
  * 
  */
 public class TrackingSessions implements Repository {
-	static Logger logger = Logger.getLogger("[TrackingSessionRepo]");
-
 	private static final String TRACKING_SESSION_PREFIX = "tracking-session-";
 	private final HashMap<String, TrackingSession> trackingSessions;
 
